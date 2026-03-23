@@ -375,47 +375,6 @@
       color: #bbb;
       font-style: italic;
     }
-
-    /* ── STATS ── */
-    .stats-summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1rem;
-      background: var(--muted);
-      border-radius: 10px;
-      margin-bottom: 1.1rem;
-      border: 1px solid var(--border);
-    }
-    .stats-summary-label {
-      font-size: 0.75rem;
-      color: var(--subtext);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-    .stats-summary-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-
-    .pie-wrap {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.25rem;
-    }
-
-    .pie-wrap svg { overflow: visible; }
-
-    .stat-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
   </style>
 </head>
 <body>
@@ -818,100 +777,17 @@
     }
   }
 
-  // Palette — distinct, accessible colors
-  const PALETTE = [
-    "#6366f1", // indigo
-    "#f59e0b", // amber
-    "#10b981", // emerald
-    "#ef4444", // red
-    "#3b82f6", // blue
-    "#a855f7", // purple
-    "#f97316", // orange
-    "#14b8a6", // teal
-    "#ec4899", // pink
-    "#84cc16", // lime
-  ];
-
-  function fmtTime(mins) {
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m === 0 ? `${h}h` : `${h}h ${m}m`;
-  }
-
-  function buildPie(slices) {
-    // slices: [{pct, color}]
-    const R = 72, CX = 90, CY = 90;
-    const circumference = 2 * Math.PI * R;
-    let paths = "";
-    let offset = 0; // start at top (rotation applied via transform)
-
-    // single-slice edge case
-    if (slices.length === 1) {
-      paths = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${slices[0].color}" />`;
-    } else {
-      for (const { pct, color } of slices) {
-        const dash = (pct / 100) * circumference;
-        const gap = circumference - dash;
-        paths += `<circle
-          cx="${CX}" cy="${CY}" r="${R}"
-          fill="none"
-          stroke="${color}"
-          stroke-width="36"
-          stroke-dasharray="${dash} ${gap}"
-          stroke-dashoffset="${-offset}"
-          transform="rotate(-90 ${CX} ${CY})"
-        />`;
-        offset += dash;
-      }
-    }
-
-    // white center hole
-    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 18}" fill="white" />`;
-
-    return `<svg width="180" height="180" viewBox="0 0 180 180">${paths}</svg>`;
-  }
-
   function renderStats(percentages, minutes) {
     const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
-    const colorMap = {};
-    sorted.forEach(([label], i) => { colorMap[label] = PALETTE[i % PALETTE.length]; });
-
-    const totalMins = Object.values(minutes).reduce((a, b) => a + b, 0);
-    const labelCount = sorted.length;
-
-    const slices = sorted.map(([label, pct]) => ({ pct, color: colorMap[label] }));
-
-    const summary = `
-      <div class="stats-summary">
-        <div>
-          <div class="stats-summary-label">Total tracked</div>
-          <div class="stats-summary-value">${fmtTime(totalMins)}</div>
-        </div>
-        <div style="text-align:right">
-          <div class="stats-summary-label">Labels</div>
-          <div class="stats-summary-value">${labelCount}</div>
-        </div>
-      </div>`;
-
-    const pie = `<div class="pie-wrap">${buildPie(slices)}</div>`;
-
-    const rows = sorted.map(([label, pct]) => `
+    document.getElementById("stats-result").innerHTML = sorted.map(([label, pct]) => `
       <div class="stat-row">
         <div class="stat-header">
-          <span style="display:flex;align-items:center;gap:0.45rem">
-            <span class="stat-dot" style="background:${colorMap[label]}"></span>
-            <span class="stat-label">${label}</span>
-          </span>
-          <span class="stat-meta">${fmtTime(minutes[label])} &nbsp;·&nbsp; ${pct}%</span>
+          <span class="stat-label">${label}</span>
+          <span class="stat-meta">${minutes[label]} min &nbsp;·&nbsp; ${pct}%</span>
         </div>
-        <div class="bar-wrap">
-          <div class="bar" style="width:${pct}%;background:${colorMap[label]}"></div>
-        </div>
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%"></div></div>
       </div>
     `).join("");
-
-    document.getElementById("stats-result").innerHTML = summary + pie + rows;
   }
 
   // On load
