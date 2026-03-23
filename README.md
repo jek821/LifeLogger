@@ -51,13 +51,11 @@ sudo apt install python3-pip nginx certbot python3-certbot-nginx -y
 pip3 install fastapi pydantic uvicorn
 ```
 
-### 3. Copy the project
+### 3. Clone the project
 
 ```bash
-scp -r ./TimeLogger root@your-server-ip:/opt/timelogger
+git clone your-repo-url /opt/timelogger
 ```
-
-Or clone from your repo if you have one.
 
 ### 4. Create a systemd service
 
@@ -65,7 +63,7 @@ Or clone from your repo if you have one.
 sudo nano /etc/systemd/system/timelogger.service
 ```
 
-Paste:
+Paste, replacing `yourname` and `yourpassword` with your actual credentials **before saving**:
 
 ```ini
 [Unit]
@@ -84,12 +82,19 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
+> **Important:** The systemd service runs in an isolated environment. Shell exports and `.bashrc` variables are NOT inherited by it. Credentials must be set directly in the `Environment=` lines above — not in your shell.
+
 Enable and start it:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now timelogger
 sudo systemctl status timelogger   # verify it's running
+```
+
+To verify the service picked up the right credentials:
+```bash
+sudo systemctl show timelogger | grep Environment
 ```
 
 ### 5. Configure nginx
