@@ -1,6 +1,6 @@
-# TimeLogger
+# Jacob's Life Logger
 
-Personal time tracking app backed by SQLite, with a FastAPI backend and plain HTML/CSS/JS frontend.
+Personal life tracking app backed by SQLite, with a FastAPI backend and plain HTML/CSS/JS frontend.
 
 ---
 
@@ -9,12 +9,7 @@ Personal time tracking app backed by SQLite, with a FastAPI backend and plain HT
 ### 1. Install dependencies
 
 ```bash
-pip install fastapi pydantic
-```
-
-```bash
-sudo dnf install python3-uvicorn   # Fedora
-# or: pip install uvicorn
+pip install fastapi pydantic uvicorn
 ```
 
 ### 2. Set environment variables
@@ -54,24 +49,24 @@ pip3 install fastapi pydantic uvicorn
 ### 3. Clone the project
 
 ```bash
-git clone your-repo-url /opt/timelogger
+git clone your-repo-url /opt/lifelogger
 ```
 
 ### 4. Create a systemd service
 
 ```bash
-sudo nano /etc/systemd/system/timelogger.service
+sudo nano /etc/systemd/system/lifelogger.service
 ```
 
 Paste, replacing `yourname` and `yourpassword` with your actual credentials **before saving**:
 
 ```ini
 [Unit]
-Description=TimeLogger
+Description=Jacob's Life Logger
 After=network.target
 
 [Service]
-WorkingDirectory=/opt/timelogger
+WorkingDirectory=/opt/lifelogger
 ExecStart=python3 -m uvicorn api:app --host 127.0.0.1 --port 8000
 Environment=TIMELOGGER_USER=yourname
 Environment=TIMELOGGER_PASS=yourpassword
@@ -88,19 +83,19 @@ Enable and start it:
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now timelogger
-sudo systemctl status timelogger   # verify it's running
+sudo systemctl enable --now lifelogger
+sudo systemctl status lifelogger   # verify it's running
 ```
 
 To verify the service picked up the right credentials:
 ```bash
-sudo systemctl show timelogger | grep Environment
+sudo systemctl show lifelogger | grep Environment
 ```
 
 ### 5. Configure nginx
 
 ```bash
-sudo nano /etc/nginx/sites-available/timelogger
+sudo nano /etc/nginx/sites-available/lifelogger
 ```
 
 Paste (replace `yourdomain.com`):
@@ -121,7 +116,7 @@ server {
 Enable the site:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/timelogger /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/lifelogger /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl reload nginx
 ```
@@ -166,7 +161,7 @@ Edit `SEED_LABELS` in `main.py` to set the initial labels inserted into the data
 SEED_LABELS = {"Programming", "Meeting", "Lunch", "Exercise"}
 ```
 
-Labels can also be added and deleted at runtime via the UI or the `/labels` endpoints. Deleting a label does **not** affect existing entries that used it.
+Labels can also be added and deleted at runtime via the UI or the `/labels` endpoints. Deleting a label does **not** affect existing events that used it.
 
 ---
 
@@ -175,29 +170,31 @@ Labels can also be added and deleted at runtime via the UI or the `/labels` endp
 SQLite database stored at `timelogger.db` in the project directory. Schema:
 
 ```sql
-entries (date TEXT, time TEXT, label TEXT, PRIMARY KEY (date, time))
-labels  (label TEXT PRIMARY KEY)
+events (id INTEGER PRIMARY KEY, label TEXT, started_at TEXT, ended_at TEXT)
+labels (label TEXT PRIMARY KEY)
 ```
 
-- Dates are stored in ISO format: `YYYY-MM-DD`
-- Times are stored as 15-minute increment strings: `H:MM AM/PM`
-- Entries with the same date+time are overwritten on re-submission
+- All timestamps are stored in UTC as ISO 8601 strings
+- `ended_at` is `NULL` while an event is active
+- Only one event can be active at a time — starting a new event automatically ends the current one
+- Active events survive server restarts (state is in the DB, not memory)
 
 ---
 
 ## Frontend
 
-Three cards:
-
-- **Labels** — view all labels as chips. Click `+ Manage` to add or delete labels.
-- **Log Activity** — log a label to a single time slot or a time range (15-min increments). Date and time default to today and the nearest past 15-min slot.
-- **Statistics** — query a single date or date range. Returns time per label as both percentages and total minutes, sorted by usage.
+- **Timer** — shows the currently active event and elapsed time. Tap any label button to start logging that activity (automatically ends the previous one).
+- **Labels** — manage your label set. Deleting a label does not affect past events.
+- **History** — view, edit, and delete past events for a given date range.
+- **Statistics** — query a date range to see time per label as percentages and total minutes, sorted by usage.
 
 ---
 
 ## API Endpoints
 
 All endpoints except `GET /` and `POST /login` require a valid `Authorization: Bearer <token>` header.
+
+Timestamps are UTC ISO 8601 strings (e.g. `2026-03-23T14:30:00+00:00`). The frontend is responsible for converting to/from the user's local timezone.
 
 ### Auth
 
@@ -221,43 +218,55 @@ Returns all labels sorted alphabetically.
 ```
 
 #### `POST /labels`
-Add a new label.
 ```json
 { "label": "Exercise" }
 ```
 Returns `{ "ok": true, "labels": [...] }`.
 
 #### `DELETE /labels/{label}`
-Delete a label. Existing entries with that label are unaffected.
-Returns `{ "ok": true, "labels": [...] }`.
+Deletes a label. Existing events with that label are unaffected.
 
 ---
 
-### Entries
+### Events
 
-#### `POST /entry`
-Log a single 15-minute slot.
+#### `GET /event/active`
+Returns the currently active event, or `null` if none.
 ```json
-{ "date": "2026-03-23", "time": "5:45 PM", "label": "Programming" }
+{ "event": { "id": 42, "label": "Programming", "started_at": "2026-03-23T14:00:00+00:00", "ended_at": null } }
 ```
 
-#### `POST /entry/range`
-Log a range of 15-minute slots to one label (end time is exclusive).
+#### `POST /event/start`
+Ends the active event (if any) and starts a new one.
 ```json
-{ "date": "2026-03-23", "start_time": "1:00 PM", "end_time": "3:00 PM", "label": "Programming" }
+{ "label": "Programming" }
 ```
-Returns `{ "ok": true, "updated": ["1:00 PM", "1:15 PM", ...] }`.
+
+#### `POST /event/end`
+Ends the active event without starting a new one.
+
+#### `GET /events?start=<utc>&end=<utc>`
+Returns all events whose `started_at` falls within the given UTC range, ordered by start time.
+
+#### `PATCH /event/{id}`
+Edit an event's label or timestamps.
+```json
+{ "label": "Meeting", "started_at": "2026-03-23T14:00:00+00:00", "ended_at": "2026-03-23T15:00:00+00:00" }
+```
+
+#### `DELETE /event/{id}`
+Permanently deletes an event.
 
 ---
 
 ### Statistics
 
-#### `GET /stats?start_date=2026-03-17&end_date=2026-03-23`
-Returns time breakdown across a date range. For a single date, set both params to the same value.
+#### `GET /stats?start=<utc>&end=<utc>`
+Returns time breakdown across the given UTC range. Durations are in minutes (float). An active event within the range is counted up to the current time.
+
 ```json
 {
-  "percentages": { "Programming": 42.5, "Meeting": 12.5 },
-  "minutes":     { "Programming": 510,  "Meeting": 150  }
+  "percentages": { "Programming": 62.5, "Meeting": 37.5 },
+  "minutes":     { "Programming": 187.5, "Meeting": 112.5 }
 }
 ```
-Percentages sum to 100. Only dates with logged entries contribute.

@@ -8,16 +8,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --accent: #6366f1;
+      --accent:      #6366f1;
       --accent-dark: #4f46e5;
-      --bg: #f1f1f3;
-      --card: #fff;
-      --border: #e5e5e5;
-      --muted: #f7f7f8;
-      --text: #1a1a1a;
-      --subtext: #888;
-      --success: #16a34a;
-      --error: #dc2626;
+      --bg:          #f1f1f3;
+      --card:        #fff;
+      --border:      #e5e5e5;
+      --muted:       #f7f7f8;
+      --text:        #1a1a1a;
+      --subtext:     #888;
+      --success:     #16a34a;
+      --error:       #dc2626;
     }
 
     body {
@@ -56,7 +56,6 @@
       font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 1.5rem;
-      color: var(--text);
     }
 
     /* ── APP SHELL ── */
@@ -81,7 +80,6 @@
       font-size: 1.25rem;
       font-weight: 700;
       letter-spacing: -0.3px;
-      color: var(--text);
     }
 
     /* ── CARD ── */
@@ -103,6 +101,87 @@
       margin-bottom: 1rem;
     }
 
+    /* ── TIMER ── */
+    .timer-display {
+      text-align: center;
+      padding: 1.25rem 0 1rem;
+    }
+
+    .timer-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--subtext);
+      margin-bottom: 0.3rem;
+    }
+
+    .timer-activity {
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.4px;
+      margin-bottom: 0.2rem;
+      min-height: 2rem;
+    }
+
+    .timer-activity.inactive { color: #ccc; font-weight: 400; }
+
+    .timer-elapsed {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.2rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .timer-elapsed.inactive { color: #ddd; }
+
+    .timer-since {
+      font-size: 0.75rem;
+      color: var(--subtext);
+      min-height: 1rem;
+    }
+
+    .label-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .label-btn {
+      padding: 0.6rem 0.5rem;
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      background: var(--muted);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      min-height: 44px;
+      text-align: center;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .label-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef; }
+    .label-btn:active { transform: scale(0.97); }
+
+    .label-btn.active-label {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+
+    .timer-stop-row {
+      display: flex;
+      justify-content: center;
+    }
+
     /* ── LABELS ACCORDION ── */
     .labels-trigger {
       display: flex;
@@ -119,6 +198,7 @@
       text-align: left;
       transition: background 0.1s;
       border-radius: 0;
+      min-height: 0;
     }
     .labels-trigger:hover { background: var(--muted); }
 
@@ -143,14 +223,8 @@
       padding: 0 5px;
     }
 
-    .chevron {
-      transition: transform 0.2s ease;
-      color: #bbb;
-      flex-shrink: 0;
-    }
-    .labels-trigger[aria-expanded="true"] .chevron {
-      transform: rotate(180deg);
-    }
+    .chevron { transition: transform 0.2s ease; color: #bbb; flex-shrink: 0; }
+    .labels-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
     .labels-body {
       display: none;
@@ -197,13 +271,96 @@
     }
     .chip-delete:hover { color: var(--error); background: none; }
 
-    .add-label-row {
-      display: flex;
-      gap: 0.5rem;
-    }
+    .add-label-row { display: flex; gap: 0.5rem; }
     .add-label-row input { flex: 1; margin-bottom: 0; }
 
-    /* ── TABS ── */
+    /* ── HISTORY ── */
+    .history-controls {
+      display: flex;
+      gap: 0.5rem;
+      align-items: flex-end;
+      margin-bottom: 1rem;
+    }
+    .history-controls .field { flex: 1; margin-bottom: 0; }
+
+    .event-list { display: flex; flex-direction: column; gap: 0.5rem; }
+
+    .event-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: var(--muted);
+      border-radius: 9px;
+      border: 1px solid var(--border);
+    }
+
+    .event-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: var(--accent);
+    }
+
+    .event-info { flex: 1; min-width: 0; }
+
+    .event-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .event-time {
+      font-size: 0.75rem;
+      color: var(--subtext);
+      margin-top: 0.1rem;
+    }
+
+    .event-duration {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--subtext);
+      white-space: nowrap;
+    }
+
+    .event-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
+
+    .icon-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--card);
+      cursor: pointer;
+      color: var(--subtext);
+      font-size: 0.8rem;
+      min-height: 0;
+      padding: 0;
+      transition: all 0.15s;
+    }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef; }
+    .icon-btn.danger:hover { border-color: var(--error); color: var(--error); background: #fff0f0; }
+
+    /* Edit form inside event row */
+    .event-edit-form {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--muted);
+      border-radius: 9px;
+      border: 1px solid var(--border);
+    }
+
+    .event-edit-form .row { display: flex; gap: 0.5rem; }
+    .event-edit-form .field { flex: 1; margin-bottom: 0; }
+    .event-edit-actions { display: flex; gap: 0.5rem; }
+
+    /* ── STATS ── */
     .tabs {
       display: flex;
       background: var(--muted);
@@ -236,7 +393,31 @@
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── FORM ── */
+    .stats-summary {
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--muted);
+      border-radius: 10px;
+      margin-bottom: 1.1rem;
+      border: 1px solid var(--border);
+    }
+    .stats-summary-label { font-size: 0.72rem; color: var(--subtext); font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; }
+    .stats-summary-value { font-size: 1rem; font-weight: 700; letter-spacing: -0.3px; }
+
+    .pie-wrap { display: flex; justify-content: center; margin-bottom: 1.25rem; }
+    .pie-wrap svg { overflow: visible; }
+
+    .stat-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.9rem; }
+    .stat-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.875rem; }
+    .stat-label { font-weight: 500; }
+    .stat-meta { color: #aaa; font-size: 0.78rem; }
+    .stat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
+
+    .bar-wrap { background: var(--muted); border-radius: 4px; height: 5px; width: 100%; overflow: hidden; }
+    .bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+
+    /* ── FORM ELEMENTS ── */
     .field { margin-bottom: 0.85rem; }
 
     label {
@@ -250,20 +431,19 @@
     select,
     input[type="date"],
     input[type="text"],
-    input[type="password"] {
+    input[type="password"],
+    input[type="datetime-local"] {
       width: 100%;
       padding: 0.6rem 0.75rem;
       border: 1.5px solid var(--border);
       border-radius: 9px;
-      font-size: 0.9rem;
+      font-size: max(16px, 0.9rem);
       background: var(--muted);
       color: var(--text);
       outline: none;
       transition: border-color 0.15s, background 0.15s;
       -webkit-appearance: none;
       appearance: none;
-      /* Prevent iOS zoom on focus (needs font-size >= 16px or this trick) */
-      font-size: max(16px, 0.9rem);
     }
 
     select {
@@ -285,7 +465,6 @@
     .row { display: flex; gap: 0.6rem; }
     .row .field { flex: 1; }
 
-    /* ── BUTTONS ── */
     button {
       display: inline-flex;
       align-items: center;
@@ -300,7 +479,7 @@
       cursor: pointer;
       transition: background 0.15s, transform 0.1s;
       white-space: nowrap;
-      min-height: 44px; /* accessible tap target */
+      min-height: 44px;
       -webkit-tap-highlight-color: transparent;
     }
 
@@ -316,9 +495,19 @@
       min-height: 38px;
       padding: 0.4rem 0.85rem;
     }
-    button.secondary:hover { background: var(--border); }
+    button.secondary:hover { background: var(--border); color: var(--text); }
 
-    /* ── STATUS ── */
+    button.danger {
+      background: var(--error);
+    }
+    button.danger:hover { background: #b91c1c; }
+
+    button.sm {
+      font-size: 0.8rem;
+      min-height: 36px;
+      padding: 0.35rem 0.85rem;
+    }
+
     .status {
       margin-top: 0.65rem;
       font-size: 0.8rem;
@@ -327,95 +516,9 @@
     }
     .status.error { color: var(--error); }
 
-    /* ── STATS ── */
-    .stats-result { margin-top: 1rem; }
+    .empty { font-size: 0.82rem; color: #bbb; font-style: italic; text-align: center; padding: 0.5rem 0; }
 
-    .stat-row {
-      display: flex;
-      flex-direction: column;
-      gap: 0.3rem;
-      margin-bottom: 0.9rem;
-    }
-
-    .stat-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      font-size: 0.875rem;
-    }
-
-    .stat-label { color: var(--text); font-weight: 500; }
-    .stat-meta { color: #aaa; font-size: 0.78rem; }
-
-    .bar-wrap {
-      background: var(--muted);
-      border-radius: 4px;
-      height: 5px;
-      width: 100%;
-      overflow: hidden;
-    }
-
-    .bar {
-      height: 100%;
-      background: var(--accent);
-      border-radius: 4px;
-      transition: width 0.4s ease;
-    }
-
-    /* ── DIVIDER ── */
-    hr {
-      border: none;
-      border-top: 1px solid var(--border);
-      margin: 0.9rem 0;
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty {
-      font-size: 0.82rem;
-      color: #bbb;
-      font-style: italic;
-    }
-
-    /* ── STATS ── */
-    .stats-summary {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0.75rem 1rem;
-      background: var(--muted);
-      border-radius: 10px;
-      margin-bottom: 1.1rem;
-      border: 1px solid var(--border);
-    }
-    .stats-summary-label {
-      font-size: 0.75rem;
-      color: var(--subtext);
-      font-weight: 500;
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-    }
-    .stats-summary-value {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
-    }
-
-    .pie-wrap {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 1.25rem;
-    }
-
-    .pie-wrap svg { overflow: visible; }
-
-    .stat-dot {
-      width: 9px;
-      height: 9px;
-      border-radius: 50%;
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
+    hr { border: none; border-top: 1px solid var(--border); margin: 0.9rem 0; }
   </style>
 </head>
 <body>
@@ -445,14 +548,33 @@
     <button class="secondary" onclick="logout()">Log out</button>
   </div>
 
-  <!-- LABELS ACCORDION CARD -->
+  <!-- TIMER CARD -->
   <div class="card">
-    <button
-      class="labels-trigger"
-      aria-expanded="false"
-      aria-controls="labels-body"
-      onclick="toggleLabels(this)"
-    >
+    <div class="card-inner">
+      <div class="section-title">Now</div>
+
+      <div class="timer-display">
+        <div class="timer-label" id="timer-label">No active event</div>
+        <div class="timer-activity inactive" id="timer-activity">—</div>
+        <div class="timer-elapsed inactive" id="timer-elapsed">0:00:00</div>
+        <div class="timer-since" id="timer-since"></div>
+      </div>
+
+      <div class="label-grid" id="label-grid"></div>
+
+      <div class="timer-stop-row">
+        <button class="secondary sm" id="stop-btn" onclick="stopEvent()" style="display:none">
+          Stop
+        </button>
+      </div>
+
+      <div class="status error" id="timer-status"></div>
+    </div>
+  </div>
+
+  <!-- LABELS ACCORDION -->
+  <div class="card">
+    <button class="labels-trigger" aria-expanded="false" aria-controls="labels-body" onclick="toggleLabels(this)">
       <span class="labels-trigger-left">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
@@ -465,7 +587,6 @@
         <path d="M6 9l6 6 6-6"/>
       </svg>
     </button>
-
     <div class="labels-body" id="labels-body">
       <div class="label-chips" id="label-chips"></div>
       <div class="add-label-row">
@@ -476,60 +597,26 @@
     </div>
   </div>
 
-  <!-- LOG ACTIVITY -->
+  <!-- HISTORY CARD -->
   <div class="card">
     <div class="card-inner">
-      <div class="section-title">Log Activity</div>
-      <div class="tabs">
-        <button class="tab active" onclick="switchTab('log', 'single', this)">Single</button>
-        <button class="tab" onclick="switchTab('log', 'range', this)">Range</button>
-      </div>
-
-      <div id="log-single" class="tab-panel active">
-        <div class="row">
-          <div class="field">
-            <label>Date</label>
-            <input type="date" id="log-s-date" />
-          </div>
-          <div class="field">
-            <label>Time</label>
-            <select id="log-s-time"></select>
-          </div>
+      <div class="section-title">History</div>
+      <div class="history-controls">
+        <div class="field">
+          <label>Start</label>
+          <input type="date" id="hist-start" />
         </div>
         <div class="field">
-          <label>Label</label>
-          <select id="log-s-label"></select>
+          <label>End</label>
+          <input type="date" id="hist-end" />
         </div>
-        <button class="full" onclick="submitSingle()">Submit</button>
-        <div class="status" id="log-s-status"></div>
+        <button class="sm" onclick="loadHistory()" style="margin-bottom:0;flex-shrink:0">Query</button>
       </div>
-
-      <div id="log-range" class="tab-panel">
-        <div class="field">
-          <label>Date</label>
-          <input type="date" id="log-r-date" />
-        </div>
-        <div class="row">
-          <div class="field">
-            <label>Start</label>
-            <select id="log-r-start"></select>
-          </div>
-          <div class="field">
-            <label>End</label>
-            <select id="log-r-end"></select>
-          </div>
-        </div>
-        <div class="field">
-          <label>Label</label>
-          <select id="log-r-label"></select>
-        </div>
-        <button class="full" onclick="submitRange()">Submit</button>
-        <div class="status" id="log-r-status"></div>
-      </div>
+      <div id="event-list"><span class="empty">Select a date range and query.</span></div>
     </div>
   </div>
 
-  <!-- STATISTICS -->
+  <!-- STATISTICS CARD -->
   <div class="card">
     <div class="card-inner">
       <div class="section-title">Statistics</div>
@@ -549,11 +636,11 @@
       <div id="stats-range" class="tab-panel">
         <div class="row">
           <div class="field">
-            <label>Start Date</label>
+            <label>Start</label>
             <input type="date" id="stats-r-start" />
           </div>
           <div class="field">
-            <label>End Date</label>
+            <label>End</label>
             <input type="date" id="stats-r-end" />
           </div>
         </div>
@@ -561,7 +648,7 @@
       </div>
 
       <div class="status error" id="stats-status"></div>
-      <div class="stats-result" id="stats-result"></div>
+      <div id="stats-result"></div>
     </div>
   </div>
 
@@ -570,10 +657,10 @@
 <script>
   const API = window.location.origin;
 
+  // ── AUTH ──
   function getToken() { return localStorage.getItem("tl_token"); }
   function setToken(t) { localStorage.setItem("tl_token", t); }
   function clearToken() { localStorage.removeItem("tl_token"); }
-
   function authHeaders() {
     return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` };
   }
@@ -581,13 +668,14 @@
   function showLogin(msg) {
     document.getElementById("login-overlay").classList.remove("hidden");
     document.getElementById("app").style.display = "none";
+    stopTimerTick();
     if (msg) document.getElementById("login-status").textContent = msg;
   }
 
   function showApp() {
     document.getElementById("login-overlay").classList.add("hidden");
     document.getElementById("app").style.display = "flex";
-    loadDropdowns();
+    initApp();
   }
 
   async function login() {
@@ -602,13 +690,10 @@
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
-      const data = await res.json();
-      setToken(data.token);
+      setToken((await res.json()).token);
       document.getElementById("login-pass").value = "";
       showApp();
-    } catch (e) {
-      status.textContent = e.message;
-    }
+    } catch(e) { status.textContent = e.message; }
   }
 
   async function logout() {
@@ -620,91 +705,55 @@
   async function apiFetch(url, opts = {}) {
     if (!opts.headers) opts.headers = authHeaders();
     const res = await fetch(url, opts);
-    if (res.status === 401) {
-      clearToken();
-      showLogin("Session expired. Please log in again.");
-      throw new Error("Unauthorized");
-    }
+    if (res.status === 401) { clearToken(); showLogin("Session expired. Please log in again."); throw new Error("Unauthorized"); }
     return res;
   }
 
   document.getElementById("login-user").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   document.getElementById("login-pass").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
 
-  // ── LABELS ACCORDION ──
-  function toggleLabels(btn) {
-    const body = document.getElementById("labels-body");
-    const open = body.classList.toggle("open");
-    btn.setAttribute("aria-expanded", open);
+  // ── INIT ──
+  async function initApp() {
+    const today = new Date().toISOString().slice(0, 10);
+    document.querySelectorAll("input[type='date']").forEach(el => el.value = today);
+
+    await Promise.all([loadLabels(), loadActiveEvent()]);
   }
 
-  // ── TABS ──
-  function switchTab(card, panel, btn) {
-    document.querySelectorAll(`#${card}-single, #${card}-range`).forEach(el => el.classList.remove("active"));
-    btn.closest(".tabs").querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    document.getElementById(`${card}-${panel}`).classList.add("active");
-    btn.classList.add("active");
-  }
+  // ── LABELS ──
+  let labels = [];
 
-  // ── TIME SLOTS ──
-  function generateTimes() {
-    const times = [];
-    for (let h = 0; h < 24; h++) {
-      for (let m = 0; m < 60; m += 15) {
-        const period = h < 12 ? "AM" : "PM";
-        const hour = h % 12 === 0 ? 12 : h % 12;
-        const min = m.toString().padStart(2, "0");
-        times.push(`${hour}:${min} ${period}`);
-      }
-    }
-    return times;
-  }
-
-  function populateSelect(id, options) {
-    document.getElementById(id).innerHTML =
-      options.map(o => `<option value="${o}">${o}</option>`).join("");
+  async function loadLabels() {
+    const res = await apiFetch(`${API}/labels`);
+    const data = await res.json();
+    labels = data.labels;
+    renderChips(labels);
+    renderLabelGrid(labels);
   }
 
   function renderChips(labels) {
     document.getElementById("labels-count").textContent = labels.length;
-    document.getElementById("label-chips").innerHTML =
-      labels.length
-        ? labels.map(l => `
-            <span class="chip">
-              ${l}
-              <button class="chip-delete" onclick="deleteLabel('${l}')" title="Remove ${l}">&#x2715;</button>
-            </span>`).join("")
-        : `<span class="empty">No labels yet.</span>`;
+    document.getElementById("label-chips").innerHTML = labels.length
+      ? labels.map(l => `
+          <span class="chip">${l}
+            <button class="chip-delete" onclick="deleteLabel('${l}')" title="Remove">&#x2715;</button>
+          </span>`).join("")
+      : `<span class="empty">No labels yet.</span>`;
   }
 
-  function setCurrentDateTime() {
-    const now = new Date();
-    const isoDate = now.toISOString().slice(0, 10);
-    document.querySelectorAll("input[type='date']").forEach(el => el.value = isoDate);
-
-    const minutes = now.getHours() * 60 + now.getMinutes();
-    const snapped = Math.floor(minutes / 15) * 15;
-    const h = Math.floor(snapped / 60) % 12 || 12;
-    const m = (snapped % 60).toString().padStart(2, "0");
-    const period = Math.floor(snapped / 60) < 12 ? "AM" : "PM";
-    const timeStr = `${h}:${m} ${period}`;
-
-    ["log-s-time", "log-r-start", "log-r-end"].forEach(id => {
-      const sel = document.getElementById(id);
-      if (sel) sel.value = timeStr;
-    });
+  function renderLabelGrid(labels) {
+    const active = activeEvent?.label;
+    document.getElementById("label-grid").innerHTML = labels.length
+      ? labels.map(l => `
+          <button class="label-btn ${l === active ? 'active-label' : ''}" onclick="startEvent('${l}')">
+            ${l}
+          </button>`).join("")
+      : `<span class="empty">Add labels to get started.</span>`;
   }
 
-  async function loadDropdowns() {
-    const res = await apiFetch(`${API}/labels`);
-    const { labels } = await res.json();
-    const times = generateTimes();
-
-    renderChips(labels);
-    populateSelect("log-s-label", labels);
-    populateSelect("log-r-label", labels);
-    ["log-s-time", "log-r-start", "log-r-end"].forEach(id => populateSelect(id, times));
-    setCurrentDateTime();
+  function toggleLabels(btn) {
+    const body = document.getElementById("labels-body");
+    btn.setAttribute("aria-expanded", body.classList.toggle("open"));
   }
 
   async function addLabel() {
@@ -715,84 +764,274 @@
     status.className = "status";
     status.textContent = "";
     try {
-      const res = await apiFetch(`${API}/labels`, {
-        method: "POST",
-        body: JSON.stringify({ label }),
-      });
+      const res = await apiFetch(`${API}/labels`, { method: "POST", body: JSON.stringify({ label }) });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
       const data = await res.json();
+      labels = data.labels;
       input.value = "";
-      renderChips(data.labels);
-      populateSelect("log-s-label", data.labels);
-      populateSelect("log-r-label", data.labels);
+      renderChips(labels);
+      renderLabelGrid(labels);
       status.textContent = `"${label}" added.`;
-    } catch (e) {
-      status.className = "status error";
-      status.textContent = e.message;
-    }
+    } catch(e) { status.className = "status error"; status.textContent = e.message; }
   }
 
   async function deleteLabel(label) {
+    const status = document.getElementById("label-status");
     try {
       const res = await apiFetch(`${API}/labels/${encodeURIComponent(label)}`, { method: "DELETE" });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
       const data = await res.json();
-      renderChips(data.labels);
-      populateSelect("log-s-label", data.labels);
-      populateSelect("log-r-label", data.labels);
-    } catch (e) {
-      const status = document.getElementById("label-status");
-      status.className = "status error";
-      status.textContent = e.message;
-    }
+      labels = data.labels;
+      renderChips(labels);
+      renderLabelGrid(labels);
+    } catch(e) { status.className = "status error"; status.textContent = e.message; }
   }
 
-  document.getElementById("new-label").addEventListener("keydown", e => {
-    if (e.key === "Enter") addLabel();
-  });
+  document.getElementById("new-label").addEventListener("keydown", e => { if (e.key === "Enter") addLabel(); });
 
-  async function submitSingle() {
-    const date = document.getElementById("log-s-date").value;
-    const time = document.getElementById("log-s-time").value;
-    const label = document.getElementById("log-s-label").value;
-    const status = document.getElementById("log-s-status");
-    if (!date) { status.className = "status error"; status.textContent = "Pick a date."; return; }
-    status.className = "status";
-    status.textContent = "Saving…";
-    try {
-      const res = await apiFetch(`${API}/entry`, {
-        method: "POST",
-        body: JSON.stringify({ date, time, label }),
-      });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
-      status.textContent = "Saved.";
-    } catch (e) {
-      status.className = "status error";
-      status.textContent = e.message;
-    }
+  // ── TIMER ──
+  let activeEvent = null;
+  let timerInterval = null;
+
+  function stopTimerTick() {
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
   }
 
-  async function submitRange() {
-    const date = document.getElementById("log-r-date").value;
-    const start_time = document.getElementById("log-r-start").value;
-    const end_time = document.getElementById("log-r-end").value;
-    const label = document.getElementById("log-r-label").value;
-    const status = document.getElementById("log-r-status");
-    if (!date) { status.className = "status error"; status.textContent = "Pick a date."; return; }
-    status.className = "status";
-    status.textContent = "Saving…";
+  function startTimerTick() {
+    stopTimerTick();
+    timerInterval = setInterval(updateTimerDisplay, 1000);
+  }
+
+  function updateTimerDisplay() {
+    const elapsedEl = document.getElementById("timer-elapsed");
+    const activityEl = document.getElementById("timer-activity");
+    const labelEl = document.getElementById("timer-label");
+    const sinceEl = document.getElementById("timer-since");
+    const stopBtn = document.getElementById("stop-btn");
+
+    if (!activeEvent) {
+      activityEl.textContent = "—";
+      activityEl.className = "timer-activity inactive";
+      elapsedEl.textContent = "0:00:00";
+      elapsedEl.className = "timer-elapsed inactive";
+      labelEl.textContent = "No active event";
+      sinceEl.textContent = "";
+      stopBtn.style.display = "none";
+      return;
+    }
+
+    const elapsed = Date.now() - new Date(activeEvent.started_at).getTime();
+    const s = Math.floor(elapsed / 1000) % 60;
+    const m = Math.floor(elapsed / 60000) % 60;
+    const h = Math.floor(elapsed / 3600000);
+
+    activityEl.textContent = activeEvent.label;
+    activityEl.className = "timer-activity";
+    elapsedEl.textContent = `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    elapsedEl.className = "timer-elapsed";
+    labelEl.textContent = "Currently tracking";
+    sinceEl.textContent = `Since ${fmtLocalTime(activeEvent.started_at)}`;
+    stopBtn.style.display = "";
+  }
+
+  async function loadActiveEvent() {
+    const res = await apiFetch(`${API}/event/active`);
+    const data = await res.json();
+    activeEvent = data.event;
+    updateTimerDisplay();
+    if (activeEvent) startTimerTick();
+    renderLabelGrid(labels);
+  }
+
+  async function startEvent(label) {
+    const status = document.getElementById("timer-status");
+    status.textContent = "";
     try {
-      const res = await apiFetch(`${API}/entry/range`, {
-        method: "POST",
-        body: JSON.stringify({ date, start_time, end_time, label }),
+      const res = await apiFetch(`${API}/event/start`, { method: "POST", body: JSON.stringify({ label }) });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      activeEvent = (await res.json()).event;
+      updateTimerDisplay();
+      startTimerTick();
+      renderLabelGrid(labels);
+    } catch(e) { status.textContent = e.message; }
+  }
+
+  async function stopEvent() {
+    const status = document.getElementById("timer-status");
+    status.textContent = "";
+    try {
+      const res = await apiFetch(`${API}/event/end`, { method: "POST" });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      activeEvent = null;
+      stopTimerTick();
+      updateTimerDisplay();
+      renderLabelGrid(labels);
+    } catch(e) { status.textContent = e.message; }
+  }
+
+  // ── HISTORY ──
+  async function loadHistory() {
+    const start = document.getElementById("hist-start").value;
+    const end = document.getElementById("hist-end").value;
+    const list = document.getElementById("event-list");
+    if (!start || !end) { list.innerHTML = `<span class="empty">Pick a date range.</span>`; return; }
+
+    const startUTC = localDateToUTCStart(start);
+    const endUTC = localDateToUTCEnd(end);
+
+    try {
+      const res = await apiFetch(`${API}/events?start=${encodeURIComponent(startUTC)}&end=${encodeURIComponent(endUTC)}`);
+      if (!res.ok) throw new Error((await res.json()).detail);
+      const { events } = await res.json();
+      renderEventList(events);
+    } catch(e) { list.innerHTML = `<span class="empty">${e.message}</span>`; }
+  }
+
+  function renderEventList(events) {
+    const list = document.getElementById("event-list");
+    if (!events.length) { list.innerHTML = `<span class="empty">No events in this range.</span>`; return; }
+
+    list.innerHTML = events.map(ev => `
+      <div class="event-row" id="ev-${ev.id}">
+        <div class="event-dot"></div>
+        <div class="event-info">
+          <div class="event-label">${ev.label}</div>
+          <div class="event-time">${fmtLocalTime(ev.started_at)} → ${ev.ended_at ? fmtLocalTime(ev.ended_at) : "active"}</div>
+        </div>
+        <div class="event-duration">${ev.ended_at ? fmtDuration(ev.started_at, ev.ended_at) : "—"}</div>
+        <div class="event-actions">
+          <button class="icon-btn" onclick="showEditForm(${ev.id})" title="Edit">✎</button>
+          <button class="icon-btn danger" onclick="deleteEvent(${ev.id})" title="Delete">✕</button>
+        </div>
+      </div>
+    `).join("");
+  }
+
+  function showEditForm(id) {
+    const row = document.getElementById(`ev-${id}`);
+    // parse current values from the row
+    const label = row.querySelector(".event-label").textContent.trim();
+    const timeParts = row.querySelector(".event-time").textContent.split(" → ");
+    const isActive = timeParts[1] === "active";
+
+    // We need the raw UTC values — re-fetch them from a data attribute
+    // Store UTC on render instead
+    loadHistory(); // easiest: just refresh and show edit inline after re-render
+    // Actually, let's store data on the element properly:
+  }
+
+  // Better approach: store UTC values as data attributes on render
+  function renderEventListWithData(events) {
+    const list = document.getElementById("event-list");
+    if (!events.length) { list.innerHTML = `<span class="empty">No events in this range.</span>`; return; }
+
+    list.innerHTML = `<div class="event-list">${events.map(ev => `
+      <div class="event-row" id="ev-${ev.id}"
+           data-id="${ev.id}"
+           data-label="${ev.label}"
+           data-start="${ev.started_at}"
+           data-end="${ev.ended_at || ''}">
+        <div class="event-dot"></div>
+        <div class="event-info">
+          <div class="event-label">${ev.label}</div>
+          <div class="event-time">${fmtLocalTime(ev.started_at)} → ${ev.ended_at ? fmtLocalTime(ev.ended_at) : "<em>active</em>"}</div>
+        </div>
+        <div class="event-duration">${ev.ended_at ? fmtDuration(ev.started_at, ev.ended_at) : "—"}</div>
+        <div class="event-actions">
+          <button class="icon-btn" onclick="showEditForm(${ev.id})" title="Edit">✎</button>
+          <button class="icon-btn danger" onclick="deleteHistEvent(${ev.id})" title="Delete">✕</button>
+        </div>
+      </div>
+    `).join("")}</div>`;
+  }
+
+  // Override loadHistory to use the better renderer
+  async function loadHistory() {
+    const start = document.getElementById("hist-start").value;
+    const end = document.getElementById("hist-end").value;
+    const list = document.getElementById("event-list");
+    if (!start || !end) { list.innerHTML = `<span class="empty">Pick a date range.</span>`; return; }
+
+    const startUTC = localDateToUTCStart(start);
+    const endUTC = localDateToUTCEnd(end);
+
+    try {
+      const res = await apiFetch(`${API}/events?start=${encodeURIComponent(startUTC)}&end=${encodeURIComponent(endUTC)}`);
+      if (!res.ok) throw new Error((await res.json()).detail);
+      renderEventListWithData((await res.json()).events);
+    } catch(e) { list.innerHTML = `<span class="empty">${e.message}</span>`; }
+  }
+
+  function showEditForm(id) {
+    const row = document.getElementById(`ev-${id}`);
+    const evLabel = row.dataset.label;
+    const evStart = row.dataset.start;
+    const evEnd = row.dataset.end;
+
+    const labelOptions = labels.map(l =>
+      `<option value="${l}" ${l === evLabel ? "selected" : ""}>${l}</option>`
+    ).join("");
+
+    row.outerHTML = `
+      <div class="event-edit-form" id="ev-${id}">
+        <div class="field" style="margin-bottom:0">
+          <label>Label</label>
+          <select id="edit-label-${id}">${labelOptions}</select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>Start</label>
+            <input type="datetime-local" id="edit-start-${id}" value="${utcToLocalInput(evStart)}" />
+          </div>
+          <div class="field">
+            <label>End</label>
+            <input type="datetime-local" id="edit-end-${id}" value="${evEnd ? utcToLocalInput(evEnd) : ''}" />
+          </div>
+        </div>
+        <div class="event-edit-actions">
+          <button class="sm" onclick="saveEdit(${id})">Save</button>
+          <button class="sm secondary" onclick="loadHistory()">Cancel</button>
+        </div>
+        <div class="status" id="edit-status-${id}"></div>
+      </div>`;
+  }
+
+  async function saveEdit(id) {
+    const label = document.getElementById(`edit-label-${id}`).value;
+    const startLocal = document.getElementById(`edit-start-${id}`).value;
+    const endLocal = document.getElementById(`edit-end-${id}`).value;
+    const status = document.getElementById(`edit-status-${id}`);
+
+    if (!startLocal) { status.className = "status error"; status.textContent = "Start time required."; return; }
+
+    const started_at = new Date(startLocal).toISOString();
+    const ended_at = endLocal ? new Date(endLocal).toISOString() : null;
+
+    try {
+      const res = await apiFetch(`${API}/event/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ label, started_at, ended_at }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
-      const data = await res.json();
-      status.textContent = `Saved ${data.updated.length} slot(s).`;
-    } catch (e) {
-      status.className = "status error";
-      status.textContent = e.message;
-    }
+      loadHistory();
+    } catch(e) { status.className = "status error"; status.textContent = e.message; }
+  }
+
+  async function deleteHistEvent(id) {
+    if (!confirm("Delete this event?")) return;
+    try {
+      const res = await apiFetch(`${API}/event/${id}`, { method: "DELETE" });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      loadHistory();
+    } catch(e) { alert(e.message); }
+  }
+
+  // ── STATS ──
+  function switchTab(card, panel, btn) {
+    document.querySelectorAll(`#${card}-single, #${card}-range`).forEach(el => el.classList.remove("active"));
+    btn.closest(".tabs").querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    document.getElementById(`${card}-${panel}`).classList.add("active");
+    btn.classList.add("active");
   }
 
   async function queryStats(mode) {
@@ -800,77 +1039,30 @@
     const result = document.getElementById("stats-result");
     status.textContent = "";
     result.innerHTML = "";
-    let start_date, end_date;
+
+    let start, end;
     if (mode === "single") {
-      start_date = end_date = document.getElementById("stats-s-date").value;
+      const d = document.getElementById("stats-s-date").value;
+      if (!d) { status.textContent = "Pick a date."; return; }
+      start = localDateToUTCStart(d);
+      end = localDateToUTCEnd(d);
     } else {
-      start_date = document.getElementById("stats-r-start").value;
-      end_date = document.getElementById("stats-r-end").value;
+      const s = document.getElementById("stats-r-start").value;
+      const e = document.getElementById("stats-r-end").value;
+      if (!s || !e) { status.textContent = "Pick a date range."; return; }
+      start = localDateToUTCStart(s);
+      end = localDateToUTCEnd(e);
     }
-    if (!start_date) { status.textContent = "Pick a date."; return; }
+
     try {
-      const res = await apiFetch(`${API}/stats?start_date=${start_date}&end_date=${end_date}`);
+      const res = await apiFetch(`${API}/stats?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`);
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
       const data = await res.json();
       renderStats(data.percentages, data.minutes);
-    } catch (e) {
-      status.textContent = e.message;
-    }
+    } catch(e) { status.textContent = e.message; }
   }
 
-  // Palette — distinct, accessible colors
-  const PALETTE = [
-    "#6366f1", // indigo
-    "#f59e0b", // amber
-    "#10b981", // emerald
-    "#ef4444", // red
-    "#3b82f6", // blue
-    "#a855f7", // purple
-    "#f97316", // orange
-    "#14b8a6", // teal
-    "#ec4899", // pink
-    "#84cc16", // lime
-  ];
-
-  function fmtTime(mins) {
-    if (mins < 60) return `${mins}m`;
-    const h = Math.floor(mins / 60);
-    const m = mins % 60;
-    return m === 0 ? `${h}h` : `${h}h ${m}m`;
-  }
-
-  function buildPie(slices) {
-    // slices: [{pct, color}]
-    const R = 72, CX = 90, CY = 90;
-    const circumference = 2 * Math.PI * R;
-    let paths = "";
-    let offset = 0; // start at top (rotation applied via transform)
-
-    // single-slice edge case
-    if (slices.length === 1) {
-      paths = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${slices[0].color}" />`;
-    } else {
-      for (const { pct, color } of slices) {
-        const dash = (pct / 100) * circumference;
-        const gap = circumference - dash;
-        paths += `<circle
-          cx="${CX}" cy="${CY}" r="${R}"
-          fill="none"
-          stroke="${color}"
-          stroke-width="36"
-          stroke-dasharray="${dash} ${gap}"
-          stroke-dashoffset="${-offset}"
-          transform="rotate(-90 ${CX} ${CY})"
-        />`;
-        offset += dash;
-      }
-    }
-
-    // white center hole
-    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 18}" fill="white" />`;
-
-    return `<svg width="180" height="180" viewBox="0 0 180 180">${paths}</svg>`;
-  }
+  const PALETTE = ["#6366f1","#f59e0b","#10b981","#ef4444","#3b82f6","#a855f7","#f97316","#14b8a6","#ec4899","#84cc16"];
 
   function renderStats(percentages, minutes) {
     const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
@@ -878,7 +1070,6 @@
     sorted.forEach(([label], i) => { colorMap[label] = PALETTE[i % PALETTE.length]; });
 
     const totalMins = Object.values(minutes).reduce((a, b) => a + b, 0);
-    const labelCount = sorted.length;
 
     const slices = sorted.map(([label, pct]) => ({ pct, color: colorMap[label] }));
 
@@ -886,11 +1077,11 @@
       <div class="stats-summary">
         <div>
           <div class="stats-summary-label">Total tracked</div>
-          <div class="stats-summary-value">${fmtTime(totalMins)}</div>
+          <div class="stats-summary-value">${fmtMins(totalMins)}</div>
         </div>
         <div style="text-align:right">
-          <div class="stats-summary-label">Labels</div>
-          <div class="stats-summary-value">${labelCount}</div>
+          <div class="stats-summary-label">Activities</div>
+          <div class="stats-summary-value">${sorted.length}</div>
         </div>
       </div>`;
 
@@ -903,22 +1094,68 @@
             <span class="stat-dot" style="background:${colorMap[label]}"></span>
             <span class="stat-label">${label}</span>
           </span>
-          <span class="stat-meta">${fmtTime(minutes[label])} &nbsp;·&nbsp; ${pct}%</span>
+          <span class="stat-meta">${fmtMins(minutes[label])} &nbsp;·&nbsp; ${pct}%</span>
         </div>
-        <div class="bar-wrap">
-          <div class="bar" style="width:${pct}%;background:${colorMap[label]}"></div>
-        </div>
-      </div>
-    `).join("");
+        <div class="bar-wrap"><div class="bar" style="width:${pct}%;background:${colorMap[label]}"></div></div>
+      </div>`).join("");
 
     document.getElementById("stats-result").innerHTML = summary + pie + rows;
   }
 
-  // On load
+  function buildPie(slices) {
+    const R = 72, CX = 90, CY = 90, C = 2 * Math.PI * R;
+    let paths = "", offset = 0;
+    if (slices.length === 1) {
+      paths = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${slices[0].color}" />`;
+    } else {
+      for (const { pct, color } of slices) {
+        const dash = (pct / 100) * C;
+        paths += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${color}" stroke-width="36"
+          stroke-dasharray="${dash} ${C - dash}" stroke-dashoffset="${-offset}"
+          transform="rotate(-90 ${CX} ${CY})" />`;
+        offset += dash;
+      }
+    }
+    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 18}" fill="white" />`;
+    return `<svg width="180" height="180" viewBox="0 0 180 180">${paths}</svg>`;
+  }
+
+  // ── UTILS ──
+  function localDateToUTCStart(dateStr) {
+    return new Date(dateStr + "T00:00:00").toISOString();
+  }
+
+  function localDateToUTCEnd(dateStr) {
+    return new Date(dateStr + "T23:59:59.999").toISOString();
+  }
+
+  function utcToLocalInput(utcStr) {
+    // Returns "YYYY-MM-DDTHH:MM" for datetime-local input
+    const d = new Date(utcStr);
+    const pad = n => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
+  function fmtLocalTime(utcStr) {
+    return new Date(utcStr).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+  }
+
+  function fmtDuration(startUTC, endUTC) {
+    const mins = (new Date(endUTC) - new Date(startUTC)) / 60000;
+    return fmtMins(mins);
+  }
+
+  function fmtMins(mins) {
+    const total = Math.round(mins);
+    if (total < 60) return `${total}m`;
+    const h = Math.floor(total / 60);
+    const m = total % 60;
+    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+  }
+
+  // ── BOOT ──
   if (getToken()) {
-    apiFetch(`${API}/labels`).then(res => {
-      if (res.ok) showApp();
-    }).catch(() => showLogin());
+    apiFetch(`${API}/labels`).then(res => { if (res.ok) showApp(); }).catch(() => showLogin());
   } else {
     showLogin();
   }
