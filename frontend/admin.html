@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Life Logger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #e85d3a;
+      --bg: #1c1714;
+      --surface: #252119;
+      --border: rgba(255,255,255,0.08);
+      --text: #ede8e1;
+      --text2: #a09890;
+      --error: #f87171;
+      --ok: #4ade80;
+      --radius: 12px;
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+    body {
+      font-family: var(--font);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100dvh;
+      padding: 1.25rem;
+    }
+    .wrap { max-width: 720px; margin: 0 auto; }
+    header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+    h1 { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+    .sub { font-size: 0.78rem; color: var(--text2); margin-top: 0.2rem; }
+    .actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    a.btn, button.btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.45rem 0.85rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text2);
+      font-size: 0.8rem;
+      font-weight: 500;
+      font-family: var(--font);
+      cursor: pointer;
+      text-decoration: none;
+    }
+    a.btn:hover, button.btn:hover { color: var(--accent); border-color: var(--accent); }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    th, td { padding: 0.65rem 0.85rem; text-align: left; border-bottom: 1px solid var(--border); }
+    th { color: var(--text2); font-weight: 500; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.08em; }
+    tr:last-child td { border-bottom: none; }
+    .mono { font-family: var(--mono); font-size: 0.78rem; }
+    .badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      background: rgba(232, 93, 58, 0.2);
+      color: var(--accent);
+    }
+    .row-actions { display: flex; gap: 0.35rem; flex-wrap: wrap; }
+    button.sm {
+      padding: 0.3rem 0.55rem;
+      font-size: 0.72rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: transparent;
+      color: var(--text2);
+      font-family: var(--font);
+      cursor: pointer;
+    }
+    button.sm:hover { color: var(--text); border-color: var(--text2); }
+    button.sm.danger:hover { color: var(--error); border-color: var(--error); }
+    #status { margin-top: 1rem; font-size: 0.85rem; color: var(--text2); }
+    #status.err { color: var(--error); }
+    #status.ok { color: var(--ok); }
+    .modal-bg {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.55);
+      z-index: 50;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-bg.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      width: 100%;
+      max-width: 360px;
+    }
+    .modal h2 { font-size: 1rem; margin-bottom: 0.75rem; }
+    .modal label { display: block; font-size: 0.72rem; color: var(--text2); margin-bottom: 0.35rem; }
+    .modal input {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      margin-bottom: 1rem;
+    }
+    .modal .row { display: flex; gap: 0.5rem; justify-content: flex-end; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>Admin</h1>
+        <p class="sub">Only the server creator (first registered account) can access this panel.</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="/">← App</a>
+        <button class="btn" type="button" id="logout-btn">Log out</button>
+      </div>
+    </header>
+
+    <div class="card">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Display name</th>
+            <th>Joined</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody id="users-body"></tbody>
+      </table>
+    </div>
+    <p id="status"></p>
+  </div>
+
+  <div class="modal-bg" id="pwd-modal">
+    <div class="modal">
+      <h2>Set temporary password</h2>
+      <p class="sub" style="margin-bottom:0.75rem" id="pwd-modal-user"></p>
+      <label for="pwd-input">New password (min 6 characters)</label>
+      <input type="text" id="pwd-input" autocomplete="new-password" />
+      <div class="row">
+        <button class="btn" type="button" id="pwd-cancel">Cancel</button>
+        <button class="btn" type="button" id="pwd-save" style="border-color:var(--accent);color:var(--accent)">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const API = window.location.origin;
+    function getToken() { return localStorage.getItem("tl_token"); }
+    function authHeaders() {
+      return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() };
+    }
+    function escapeHtml(s) {
+      return String(s)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    let adminSelfId = null;
+    let resetTargetId = null;
+
+    async function api(url, opts = {}) {
+      const res = await fetch(url, { ...opts, headers: { ...authHeaders(), ...opts.headers } });
+      return res;
+    }
+
+    function setStatus(msg, cls) {
+      const el = document.getElementById("status");
+      el.textContent = msg || "";
+      el.className = cls || "";
+    }
+
+    async function init() {
+      if (!getToken()) {
+        window.location.replace("/");
+        return;
+      }
+      const me = await api(API + "/me");
+      if (!me.ok) {
+        window.location.replace("/");
+        return;
+      }
+      const u = await me.json();
+      if (!u.is_admin) {
+        window.location.replace("/");
+        return;
+      }
+      adminSelfId = u.id;
+      await loadUsers();
+    }
+
+    async function loadUsers() {
+      setStatus("Loading…");
+      const res = await api(API + "/admin/users");
+      if (!res.ok) {
+        setStatus("Could not load users.", "err");
+        return;
+      }
+      const data = await res.json();
+      adminSelfId = data.you;
+      const tbody = document.getElementById("users-body");
+      tbody.innerHTML = data.users.map(row => {
+        const isSelf = row.id === adminSelfId;
+        const badge = row.is_admin ? '<span class="badge">Creator</span> ' : "";
+        const delBtn = isSelf
+          ? ""
+          : `<button type="button" class="sm danger" data-act="del" data-id="${row.id}" data-user="${escapeHtml(row.username)}">Delete</button>`;
+        const pwdBtn = isSelf
+          ? ""
+          : `<button type="button" class="sm" data-act="pwd" data-id="${row.id}" data-user="${escapeHtml(row.username)}">Temp password</button>`;
+        return `<tr>
+          <td class="mono">${row.id}</td>
+          <td>${escapeHtml(row.username)}</td>
+          <td>${escapeHtml(row.display_name)} ${badge}</td>
+          <td class="mono" style="font-size:0.74rem;color:var(--text2)">${escapeHtml(row.created_at.slice(0, 10))}</td>
+          <td class="row-actions">${pwdBtn}${delBtn}</td>
+        </tr>`;
+      }).join("");
+      setStatus(data.users.length + " user(s).", "ok");
+    }
+
+    document.getElementById("users-body").addEventListener("click", e => {
+      const btn = e.target.closest("button[data-act]");
+      if (!btn) return;
+      const id = Number(btn.dataset.id);
+      const username = btn.dataset.user || "";
+      if (btn.dataset.act === "del") {
+        if (!confirm(`Delete user "${username}" and all their data? This cannot be undone.`)) return;
+        deleteUser(id);
+      } else if (btn.dataset.act === "pwd") {
+        resetTargetId = id;
+        document.getElementById("pwd-modal-user").textContent = username;
+        document.getElementById("pwd-input").value = "";
+        document.getElementById("pwd-modal").classList.add("open");
+      }
+    });
+
+    async function deleteUser(id) {
+      const res = await api(API + "/admin/users/" + id, { method: "DELETE" });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus(body.detail || "Delete failed.", "err");
+        return;
+      }
+      setStatus("User deleted.", "ok");
+      await loadUsers();
+    }
+
+    document.getElementById("pwd-cancel").addEventListener("click", () => {
+      document.getElementById("pwd-modal").classList.remove("open");
+      resetTargetId = null;
+    });
+
+    document.getElementById("pwd-save").addEventListener("click", async () => {
+      const pw = document.getElementById("pwd-input").value;
+      if (pw.length < 6) {
+        alert("Password must be at least 6 characters.");
+        return;
+      }
+      const res = await api(API + "/admin/users/" + resetTargetId + "/reset-password", {
+        method: "POST",
+        body: JSON.stringify({ temporary_password: pw }),
+      });
+      const body = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        alert(body.detail || "Failed.");
+        return;
+      }
+      document.getElementById("pwd-modal").classList.remove("open");
+      resetTargetId = null;
+      setStatus(
+        (body.detail || "Temporary password set.") +
+          " Ask them to open Account → Change password after signing in.",
+        "ok"
+      );
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", async () => {
+      await api(API + "/logout", { method: "POST" }).catch(() => {});
+      localStorage.removeItem("tl_token");
+      localStorage.removeItem("tl_name");
+      window.location.replace("/");
+    });
+
+    init();
+  </script>
+</body>
+</html>

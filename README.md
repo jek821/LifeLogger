@@ -1,8 +1,28 @@
 # Life Logger
 
-Multi-user life tracking app backed by SQLite, with a FastAPI backend and plain HTML/CSS/JS frontend. Each user registers their own account and their data is fully isolated.
+**Life Logger** is a small, open-source web app you can run on your own machine or server. It helps you notice where your time actually goes: you log what you’re doing with simple labels, then use history and stats to see patterns instead of guessing. It isn’t therapy or a life coach in a box—it’s a privacy-friendly tool for people who like honest numbers when they’re trying to work, rest, and focus a little more deliberately.
+
+Under the hood it’s multi-user SQLite, a FastAPI API, and a static frontend (no framework build step). Each account keeps its own labels and events.
 
 > Contributions welcome — see [Contributing](#contributing) below.
+
+---
+
+## Project layout
+
+| Path | Role |
+|------|------|
+| `api.py` | Thin ASGI entrypoint (`uvicorn api:app` imports the real app from the package). |
+| `lifelogger/` | Python package: database (`db.py`), settings (`config.py`), domain logic (`services/`), HTTP layer (`api/`). |
+| `lifelogger/api/routers/` | One module per area (auth, labels, events, stats, admin, static pages). |
+| `frontend/` | HTML pages; **main app** styles in `css/index.css`, behavior in `js/` (ES modules, entry `js/app.js`). Static files are exposed at `/assets/…`. |
+| `timelogger.db` | SQLite file (created at the **repository root** on first run). |
+
+Initialize the database without starting the server:
+
+```bash
+python -m lifelogger
+```
 
 ---
 
@@ -11,7 +31,7 @@ Multi-user life tracking app backed by SQLite, with a FastAPI backend and plain 
 ### 1. Install dependencies
 
 ```bash
-pip install fastapi pydantic uvicorn slowapi
+pip install -r requirements.txt
 ```
 
 ### 2. Run
@@ -19,6 +39,8 @@ pip install fastapi pydantic uvicorn slowapi
 ```bash
 python3 -m uvicorn api:app --reload --host 0.0.0.0
 ```
+
+The app resolves `timelogger.db` and `frontend/` paths from the package location, so the working directory should be the **project root** (as in the command above).
 
 Frontend: `http://localhost:8000`
 Interactive API docs: `http://localhost:8000/docs`
@@ -40,13 +62,14 @@ Create a Ubuntu droplet on DigitalOcean. Point your domain's `A` record to the d
 ```bash
 sudo apt update
 sudo apt install python3-pip nginx certbot python3-certbot-nginx -y
-pip3 install fastapi pydantic uvicorn slowapi
 ```
 
 ### 3. Clone the project
 
 ```bash
 git clone https://github.com/jek821/LifeLogger /opt/lifelogger
+cd /opt/lifelogger
+pip3 install -r requirements.txt
 ```
 
 ### 4. Create a systemd service
@@ -156,7 +179,7 @@ Port 8000 should **not** be exposed publicly since uvicorn binds to `127.0.0.1` 
 
 ## Database
 
-SQLite database stored at `timelogger.db` in the project directory. Schema:
+SQLite database file `timelogger.db` lives at the **repository root** (same folder as `api.py`), regardless of the current working directory when Python starts. It is **gitignored** so clones start clean and your personal data stays local. Schema:
 
 ```sql
 users    (id, username, display_name, password_hash, created_at)
@@ -180,6 +203,7 @@ labels   (user_id, label)
 - **History** — view, edit, and delete past events for a given date range.
 - **Statistics** — query a date range to see time per label as percentages and total minutes, sorted by usage.
 - **Developer** — API reference and token access for scripting against your own data.
+- **Admin** (`/admin`) — user management for accounts flagged `is_admin` (the first registered user is promoted automatically if no admin exists).
 
 ---
 
@@ -258,6 +282,15 @@ Ends the active event (if any) and starts a new one.
 #### `POST /event/end`
 Ends the active event without starting a new one.
 
+#### `POST /event/manual`
+Create a completed (or open-ended) event in one step. Same label rules as `POST /event/start` when the user has any labels defined.
+
+```json
+{ "label": "Programming", "started_at": "2026-03-23T14:00:00+00:00", "ended_at": "2026-03-23T15:00:00+00:00" }
+```
+
+Omit `ended_at` or set it to `null` for an active event (ensure you do not already have another active event if your client relies on a single active timer).
+
 #### `GET /events?start=<utc>&end=<utc>`
 Returns all your events whose `started_at` falls within the given UTC range, ordered by start time.
 
@@ -283,6 +316,24 @@ Returns time breakdown across the given UTC range. Durations are in minutes (flo
   "minutes":     { "Programming": 187.5, "Meeting": 112.5 }
 }
 ```
+
+---
+
+### Admin (requires admin session)
+
+All routes below need `Authorization: Bearer <token>` for a user with `is_admin: true`.
+
+#### `GET /admin/users`
+Returns every user (id, username, display_name, created_at, is_admin) plus `you` (the caller’s user id).
+
+#### `DELETE /admin/users/{id}`
+Deletes a user and their sessions, labels, and events. You cannot delete your own account through this endpoint.
+
+#### `POST /admin/users/{id}/reset-password`
+```json
+{ "temporary_password": "new-temp-secret" }
+```
+Sets a new password and revokes that user’s sessions. Admins cannot reset their own password here (use **Profile → change password** in the main app).
 
 ---
 
