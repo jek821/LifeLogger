@@ -33,16 +33,32 @@
     }
 
     :root.light {
-      --bg:       #f2f1ef;
-      --surface:  #ffffff;
-      --surface2: #f7f6f4;
-      --border:   rgba(0,0,0,0.07);
-      --border2:  rgba(0,0,0,0.12);
-      --text:     #1a1917;
-      --text2:    #6b6865;
-      --text3:    #aaaaa6;
+      --bg:       #f0ebe3;
+      --surface:  #faf7f2;
+      --surface2: #f0ebe3;
+      --border:   rgba(60,40,20,0.09);
+      --border2:  rgba(60,40,20,0.15);
+      --text:     #211c15;
+      --text2:    #6b6055;
+      --text3:    #a89e92;
       --success:  #16a34a;
       --error:    #dc2626;
+    }
+
+    :root.evening {
+      --accent:      #e07828;
+      --accent-dark: #c46318;
+      --accent-soft: rgba(224, 120, 40, 0.14);
+      --bg:          #4a443c;
+      --surface:     #585248;
+      --surface2:    #625c52;
+      --border:      rgba(255,245,220,0.12);
+      --border2:     rgba(255,245,220,0.22);
+      --text:        #faf4e8;
+      --text2:       #ddd2bc;
+      --text3:       #a8987c;
+      --success:     #5ee9b5;
+      --error:       #f8a8a8;
     }
 
     body {
@@ -253,6 +269,11 @@
     :root.light .method.post   { background: rgba(37,99,235,0.1);   color: #2563eb; }
     :root.light .method.patch  { background: rgba(180,83,9,0.1);    color: #b45309; }
     :root.light .method.delete { background: rgba(220,38,38,0.1);   color: #dc2626; }
+
+    :root.evening .method.get    { background: rgba(94,233,181,0.12);  color: #5ee9b5; }
+    :root.evening .method.post   { background: rgba(96,165,250,0.12);  color: #93c5fd; }
+    :root.evening .method.patch  { background: rgba(251,191,36,0.12);  color: #fcd34d; }
+    :root.evening .method.delete { background: rgba(248,168,168,0.12); color: #f8a8a8; }
 
     .endpoint-path {
       font-family: var(--mono);
@@ -584,12 +605,17 @@
   const EX_END   = "2026-04-01T00:00:00Z";
 
   // ── THEME ──
+  const THEMES = ["dark", "evening", "light"];
+  const THEME_ICONS = { dark: "🌑", evening: "🌆", light: "☀️" };
   function applyTheme(t) {
-    document.documentElement.classList.toggle("light", t === "light");
-    document.getElementById("theme-btn").textContent = t === "light" ? "🌙" : "☀️";
+    document.documentElement.classList.remove("light", "evening");
+    if (t === "light") document.documentElement.classList.add("light");
+    if (t === "evening") document.documentElement.classList.add("evening");
+    document.getElementById("theme-btn").textContent = THEME_ICONS[t] || "🌑";
   }
   function toggleTheme() {
-    const next = document.documentElement.classList.contains("light") ? "dark" : "light";
+    const current = localStorage.getItem("tl_theme") || "dark";
+    const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
     localStorage.setItem("tl_theme", next);
     applyTheme(next);
   }

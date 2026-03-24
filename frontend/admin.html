@@ -24,6 +24,26 @@
       --font: 'DM Sans', sans-serif;
       --mono: 'DM Mono', monospace;
     }
+    :root.light {
+      --accent: #d94f2a;
+      --bg: #f0ebe3;
+      --surface: #faf7f2;
+      --border: rgba(60,40,20,0.09);
+      --text: #211c15;
+      --text2: #6b6055;
+      --error: #dc2626;
+      --ok: #16a34a;
+    }
+    :root.evening {
+      --accent: #e07828;
+      --bg: #4a443c;
+      --surface: #585248;
+      --border: rgba(255,245,220,0.12);
+      --text: #faf4e8;
+      --text2: #ddd2bc;
+      --error: #f8a8a8;
+      --ok: #5ee9b5;
+    }
     body {
       font-family: var(--font);
       background: var(--bg);
@@ -139,6 +159,7 @@
         <p class="sub">Only the server creator (first registered account) can access this panel.</p>
       </div>
       <div class="actions">
+        <button class="btn" type="button" id="admin-theme-btn" onclick="cycleTheme()" title="Toggle theme">🌑</button>
         <a class="btn" href="/">← App</a>
         <button class="btn" type="button" id="logout-btn">Log out</button>
       </div>
@@ -166,7 +187,7 @@
       <h2>Set temporary password</h2>
       <p class="sub" style="margin-bottom:0.75rem" id="pwd-modal-user"></p>
       <label for="pwd-input">New password (min 6 characters)</label>
-      <input type="text" id="pwd-input" autocomplete="new-password" />
+      <input type="password" id="pwd-input" autocomplete="new-password" />
       <div class="row">
         <button class="btn" type="button" id="pwd-cancel">Cancel</button>
         <button class="btn" type="button" id="pwd-save" style="border-color:var(--accent);color:var(--accent)">Save</button>
@@ -176,6 +197,25 @@
 
   <script>
     const API = window.location.origin;
+
+    // ── THEME ──
+    const THEMES = ["dark", "evening", "light"];
+    const THEME_ICONS = { dark: "🌑", evening: "🌆", light: "☀️" };
+    function applyTheme(t) {
+      document.documentElement.classList.remove("light", "evening");
+      if (t === "light") document.documentElement.classList.add("light");
+      if (t === "evening") document.documentElement.classList.add("evening");
+      const btn = document.getElementById("admin-theme-btn");
+      if (btn) btn.textContent = THEME_ICONS[t] || "🌑";
+    }
+    function cycleTheme() {
+      const current = localStorage.getItem("tl_theme") || "dark";
+      const next = THEMES[(THEMES.indexOf(current) + 1) % THEMES.length];
+      localStorage.setItem("tl_theme", next);
+      applyTheme(next);
+    }
+    applyTheme(localStorage.getItem("tl_theme") || "dark");
+
     function getToken() { return localStorage.getItem("tl_token"); }
     function authHeaders() {
       return { "Content-Type": "application/json", "Authorization": "Bearer " + getToken() };
