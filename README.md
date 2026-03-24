@@ -11,7 +11,7 @@ Multi-user life tracking app backed by SQLite, with a FastAPI backend and plain 
 ### 1. Install dependencies
 
 ```bash
-pip install fastapi pydantic uvicorn
+pip install fastapi pydantic uvicorn slowapi
 ```
 
 ### 2. Run
@@ -40,7 +40,7 @@ Create a Ubuntu droplet on DigitalOcean. Point your domain's `A` record to the d
 ```bash
 sudo apt update
 sudo apt install python3-pip nginx certbot python3-certbot-nginx -y
-pip3 install fastapi pydantic uvicorn
+pip3 install fastapi pydantic uvicorn slowapi
 ```
 
 ### 3. Clone the project
@@ -89,11 +89,25 @@ sudo nano /etc/nginx/sites-available/lifelogger
 Paste (replace `yourdomain.com`):
 
 ```nginx
+# Rate limit zones — defined outside the server block
+limit_req_zone $binary_remote_addr zone=auth:10m  rate=10r/m;
+limit_req_zone $binary_remote_addr zone=api:10m   rate=200r/m;
+
 server {
     listen 80;
     server_name yourdomain.com;
 
+    # Stricter limit on auth endpoints (brute-force protection)
+    location ~ ^/(login|register)$ {
+        limit_req zone=auth burst=5 nodelay;
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+
+    # General API limit
     location / {
+        limit_req zone=api burst=30 nodelay;
         proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;

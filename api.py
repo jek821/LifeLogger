@@ -1,8 +1,11 @@
-from fastapi import FastAPI, HTTPException, Depends
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from slowapi import Limiter
+from slowapi.middleware import SlowAPIMiddleware
+from slowapi.errors import RateLimitExceeded
 
 from main import (
     init_db,
@@ -14,8 +17,28 @@ from main import (
     get_statistics,
 )
 
-app = FastAPI()
 
+def _get_ip(request: Request) -> str:
+    """Resolve the real client IP, accounting for nginx's X-Real-IP header."""
+    return (
+        request.headers.get("X-Real-IP")
+        or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+        or request.client.host
+    )
+
+
+limiter = Limiter(key_func=_get_ip, default_limits=["200/minute"])
+
+app = FastAPI()
+app.state.limiter = limiter
+
+
+async def _on_rate_limit(request: Request, exc: RateLimitExceeded):
+    return JSONResponse(status_code=429, content={"detail": "Too many requests. Please slow down."})
+
+
+app.add_exception_handler(RateLimitExceeded, _on_rate_limit)
+app.add_middleware(SlowAPIMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -73,8 +96,14 @@ def serve_frontend():
     return FileResponse("index.html")
 
 
+@app.get("/developer")
+def serve_developer():
+    return FileResponse("developer.html")
+
+
 @app.post("/register")
-def register(body: RegisterRequest):
+@limiter.limit("5/minute")
+def register(request: Request, body: RegisterRequest):
     username = body.username.strip()
     display_name = body.display_name.strip()
     if not username or not display_name or not body.password:
@@ -89,7 +118,8 @@ def register(body: RegisterRequest):
 
 
 @app.post("/login")
-def login(body: LoginRequest):
+@limiter.limit("10/minute")
+def login(request: Request, body: LoginRequest):
     user = authenticate_user(body.username, body.password)
     if not user:
         raise HTTPException(status_code=401, detail="Invalid username or password.")
