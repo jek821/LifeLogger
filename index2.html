@@ -10,7 +10,6 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── DARK THEME (default) ── */
     :root {
       --accent:      #e85d3a;
       --accent-dark: #c94825;
@@ -25,26 +24,10 @@
       --text3:       #6e6a66;
       --success:     #4ade80;
       --error:       #f87171;
-      --pie-hole:    #27272d;
       --radius:      14px;
       --radius-sm:   9px;
       --font:        'DM Sans', sans-serif;
       --mono:        'DM Mono', monospace;
-    }
-
-    /* ── LIGHT THEME ── */
-    :root.light {
-      --bg:          #f2f1ef;
-      --surface:     #ffffff;
-      --surface2:    #f7f6f4;
-      --border:      rgba(0,0,0,0.07);
-      --border2:     rgba(0,0,0,0.12);
-      --text:        #1a1917;
-      --text2:       #6b6865;
-      --text3:       #aaaaa6;
-      --success:     #16a34a;
-      --error:       #dc2626;
-      --pie-hole:    #ffffff;
     }
 
     body {
@@ -56,7 +39,6 @@
       flex-direction: column;
       align-items: center;
       padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
-      transition: background 0.2s, color 0.2s;
     }
 
     /* ── LOGIN ── */
@@ -114,7 +96,6 @@
       justify-content: space-between;
       align-items: center;
       padding: 0.75rem 0.25rem 0.5rem;
-      gap: 0.5rem;
     }
 
     .app-header-left .wordmark {
@@ -132,32 +113,6 @@
       letter-spacing: -0.02em;
       color: var(--text);
     }
-
-    .header-actions {
-      display: flex;
-      gap: 0.4rem;
-      align-items: center;
-      flex-shrink: 0;
-    }
-
-    .theme-toggle {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      width: 34px;
-      height: 34px;
-      border-radius: 8px;
-      border: 1px solid var(--border2);
-      background: var(--surface2);
-      cursor: pointer;
-      color: var(--text2);
-      font-size: 0.9rem;
-      min-height: 0;
-      padding: 0;
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-    .theme-toggle:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 
     /* ── CARD ── */
     .card {
@@ -179,17 +134,22 @@
     }
 
     /* ── TIMER ── */
-    .timer-body { padding: 1.5rem 1.25rem 1.25rem; }
+    .timer-body {
+      padding: 1.5rem 1.25rem 1.25rem;
+    }
 
     .timer-top {
       display: flex;
       align-items: flex-start;
       justify-content: space-between;
       margin-bottom: 1.25rem;
-      gap: 0.75rem;
     }
 
-    .timer-meta { display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+    .timer-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 0.2rem;
+    }
 
     .timer-state {
       font-size: 0.6rem;
@@ -205,9 +165,6 @@
       letter-spacing: -0.02em;
       color: var(--text);
       min-height: 1.8rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     .timer-activity.inactive { color: var(--text3); font-weight: 300; font-style: italic; }
 
@@ -219,7 +176,10 @@
       min-height: 1.1rem;
     }
 
-    .timer-elapsed-wrap { text-align: right; flex-shrink: 0; }
+    .timer-elapsed-wrap {
+      text-align: right;
+      flex-shrink: 0;
+    }
 
     .timer-elapsed {
       font-size: 2.4rem;
@@ -254,9 +214,15 @@
       -webkit-tap-highlight-color: transparent;
       letter-spacing: -0.01em;
     }
+
     .label-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
     .label-btn:active { transform: scale(0.96); }
-    .label-btn.active-label { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+    .label-btn.active-label {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
 
     .timer-footer {
       display: flex;
@@ -265,8 +231,8 @@
       min-height: 2rem;
     }
 
-    /* ── ACCORDION ── */
-    .accordion-trigger {
+    /* ── LABELS ACCORDION ── */
+    .labels-trigger {
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -282,14 +248,17 @@
       text-align: left;
       border-radius: 0;
       min-height: 0;
-      transition: background 0.1s, color 0.1s;
-      gap: 0.5rem;
+      transition: background 0.1s;
     }
-    .accordion-trigger:hover { background: var(--surface2); color: var(--text); }
+    .labels-trigger:hover { background: var(--surface2); color: var(--text); }
 
-    .accordion-trigger-left { display: flex; align-items: center; gap: 0.55rem; }
+    .labels-trigger-left {
+      display: flex;
+      align-items: center;
+      gap: 0.55rem;
+    }
 
-    .accordion-badge {
+    .labels-badge {
       display: inline-flex;
       align-items: center;
       justify-content: center;
@@ -305,13 +274,14 @@
     }
 
     .chevron { transition: transform 0.2s ease; color: var(--text3); flex-shrink: 0; }
-    .accordion-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
+    .labels-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
-    .accordion-body { display: none; border-top: 1px solid var(--border); }
-    .accordion-body.open { display: block; }
-
-    /* ── LABELS INNER ── */
-    .labels-inner { padding: 0 1.25rem 1.25rem; }
+    .labels-body {
+      display: none;
+      padding: 0 1.25rem 1.25rem;
+      border-top: 1px solid var(--border);
+    }
+    .labels-body.open { display: block; }
 
     .label-chips {
       display: flex;
@@ -354,21 +324,18 @@
     .add-label-row { display: flex; gap: 0.5rem; }
     .add-label-row input { flex: 1; margin-bottom: 0; }
 
-    /* ── HISTORY INNER ── */
-    .history-inner { padding: 1.1rem 1.25rem 1.25rem; }
-
-    /* Grid layout: two date fields + button, no overflow */
+    /* ── HISTORY ── */
     .history-filter {
-      display: grid;
-      grid-template-columns: 1fr 1fr auto;
+      display: flex;
       gap: 0.4rem;
       align-items: flex-end;
       margin-bottom: 1rem;
     }
-    .history-filter .field { margin-bottom: 0; }
+    .history-filter .field { flex: 1; margin-bottom: 0; }
 
     .event-list { display: flex; flex-direction: column; gap: 0.4rem; }
 
+    /* Mobile-first event row: stacked layout */
     .event-row {
       display: grid;
       grid-template-areas:
@@ -387,7 +354,8 @@
 
     .event-dot {
       grid-area: dot;
-      width: 7px; height: 7px;
+      width: 7px;
+      height: 7px;
       border-radius: 50%;
       flex-shrink: 0;
       background: var(--accent);
@@ -426,13 +394,19 @@
       white-space: nowrap;
     }
 
-    .event-actions { grid-area: actions; display: flex; gap: 0.3rem; flex-shrink: 0; }
+    .event-actions {
+      grid-area: actions;
+      display: flex;
+      gap: 0.3rem;
+      flex-shrink: 0;
+    }
 
     .icon-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px; height: 28px;
+      width: 28px;
+      height: 28px;
       border-radius: 7px;
       border: 1px solid var(--border2);
       background: var(--surface);
@@ -447,28 +421,47 @@
     .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
     .icon-btn.danger:hover { border-color: var(--error); color: var(--error); background: rgba(248,113,113,0.08); }
 
+    /* Edit form — full width, clearly separated */
     .event-edit-form {
       display: flex;
       flex-direction: column;
-      gap: 0.65rem;
+      gap: 0.75rem;
       padding: 1rem;
       background: var(--surface2);
       border-radius: var(--radius-sm);
       border: 1px solid var(--border2);
     }
+
+    .event-edit-form .edit-label {
+      font-size: 0.6rem;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text3);
+      margin-bottom: 0.75rem;
+    }
+
     .event-edit-form .field { margin-bottom: 0; }
 
-    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; }
-    .event-edit-actions { display: flex; gap: 0.5rem; padding-top: 0.1rem; }
+    .event-edit-form .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
 
-    /* ── STATS INNER ── */
-    .stats-inner { padding: 1.1rem 1.25rem 1.25rem; }
+    .event-edit-actions {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 0.25rem;
+    }
 
+    /* ── STATS ── */
     .tabs {
       display: flex;
       background: var(--surface2);
       border-radius: var(--radius-sm);
-      padding: 3px; gap: 3px;
+      padding: 3px;
+      gap: 3px;
       margin-bottom: 1.1rem;
     }
 
@@ -487,12 +480,21 @@
       min-height: 0;
       width: auto;
     }
-    .tab.active { background: var(--surface); color: var(--text); box-shadow: 0 1px 4px rgba(0,0,0,0.15); }
+    .tab.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+    }
 
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    .stats-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.1rem; }
+    .stats-summary {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+      margin-bottom: 1.1rem;
+    }
 
     .stat-summary-cell {
       padding: 0.75rem 0.9rem;
@@ -550,7 +552,7 @@
 
     select {
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236e6a66' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5754' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 0.75rem center;
       padding-right: 2.25rem;
@@ -600,10 +602,19 @@
     button.danger { background: var(--error); }
     button.danger:hover { background: #e05050; }
 
-    button.sm { font-size: 0.8rem; min-height: 36px; padding: 0.35rem 0.85rem; }
+    button.sm {
+      font-size: 0.8rem;
+      min-height: 36px;
+      padding: 0.35rem 0.85rem;
+    }
 
     /* ── MISC ── */
-    .status { margin-top: 0.6rem; font-size: 0.78rem; min-height: 1.1rem; color: var(--success); }
+    .status {
+      margin-top: 0.6rem;
+      font-size: 0.78rem;
+      min-height: 1.1rem;
+      color: var(--success);
+    }
     .status.error { color: var(--error); }
 
     .empty { font-size: 0.8rem; color: var(--text3); font-style: italic; text-align: center; padding: 0.75rem 0; }
@@ -642,13 +653,10 @@
       <div class="wordmark">Life Logger</div>
       <h1>Jacob's Log</h1>
     </div>
-    <div class="header-actions">
-      <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
-      <button class="secondary sm" onclick="logout()">Log out</button>
-    </div>
+    <button class="secondary sm" onclick="logout()">Log out</button>
   </div>
 
-  <!-- TIMER CARD (always visible) -->
+  <!-- TIMER CARD -->
   <div class="card">
     <div class="timer-body">
       <div class="timer-top">
@@ -666,144 +674,120 @@
 
       <div class="timer-footer">
         <div class="status error" style="flex:1;margin:0" id="timer-status"></div>
-        <button class="sm secondary" id="stop-btn" onclick="stopEvent()" style="display:none">Stop</button>
+        <button class="sm secondary" id="stop-btn" onclick="stopEvent()" style="display:none">
+          Stop
+        </button>
       </div>
     </div>
   </div>
 
   <!-- LABELS ACCORDION -->
   <div class="card">
-    <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this, 'labels-body')">
-      <span class="accordion-trigger-left">
+    <button class="labels-trigger" aria-expanded="false" aria-controls="labels-body" onclick="toggleLabels(this)">
+      <span class="labels-trigger-left">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
           <line x1="7" y1="7" x2="7.01" y2="7"/>
         </svg>
         Labels
-        <span class="accordion-badge" id="labels-count">0</span>
+        <span class="labels-badge" id="labels-count">0</span>
       </span>
       <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 9l6 6 6-6"/>
       </svg>
     </button>
-    <div class="accordion-body" id="labels-body">
-      <div class="labels-inner">
-        <div class="label-chips" id="label-chips"></div>
-        <div class="add-label-row">
-          <input type="text" id="new-label" placeholder="New label…" />
-          <button onclick="addLabel()">Add</button>
-        </div>
-        <div class="status" id="label-status"></div>
+    <div class="labels-body" id="labels-body">
+      <div class="label-chips" id="label-chips"></div>
+      <div class="add-label-row">
+        <input type="text" id="new-label" placeholder="New label…" />
+        <button onclick="addLabel()">Add</button>
       </div>
+      <div class="status" id="label-status"></div>
     </div>
   </div>
 
-  <!-- HISTORY ACCORDION -->
+  <!-- HISTORY CARD -->
   <div class="card">
-    <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this, 'history-body')">
-      <span class="accordion-trigger-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
-        </svg>
-        History
-      </span>
-      <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9l6 6 6-6"/>
-      </svg>
-    </button>
-    <div class="accordion-body" id="history-body">
-      <div class="history-inner">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-          <div class="section-label" style="margin-bottom:0">Entries</div>
-          <button class="sm secondary" onclick="toggleAddForm()">+ Add entry</button>
-        </div>
+    <div class="card-inner">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="section-label" style="margin-bottom:0">History</div>
+        <button class="sm secondary" onclick="toggleAddForm()">+ Add entry</button>
+      </div>
 
-        <div id="add-form" style="display:none;margin-bottom:1rem;">
-          <div class="event-edit-form">
-            <div class="section-label" style="margin:0 0 0.25rem">New Entry</div>
-            <div class="field">
-              <label>Label</label>
-              <select id="add-label"></select>
-            </div>
-            <div class="two-col">
-              <div class="field">
-                <label>Start</label>
-                <input type="datetime-local" id="add-start" />
-              </div>
-              <div class="field">
-                <label>End</label>
-                <input type="datetime-local" id="add-end" />
-              </div>
-            </div>
-            <div class="event-edit-actions">
-              <button class="sm" onclick="addManualEntry()">Save</button>
-              <button class="sm secondary" onclick="toggleAddForm()">Cancel</button>
-            </div>
-            <div class="status" id="add-status"></div>
+      <!-- Manual add form -->
+      <div id="add-form" style="display:none;margin-bottom:1rem;">
+        <div class="event-edit-form">
+          <div class="section-label" style="margin:0 0 0.6rem">New Entry</div>
+          <div class="field" style="margin-bottom:0.5rem">
+            <label>Label</label>
+            <select id="add-label"></select>
           </div>
+          <div class="two-col">
+            <div class="field">
+              <label>Start</label>
+              <input type="datetime-local" id="add-start" />
+            </div>
+            <div class="field">
+              <label>End</label>
+              <input type="datetime-local" id="add-end" />
+            </div>
+          </div>
+          <div class="event-edit-actions">
+            <button class="sm" onclick="addManualEntry()">Save</button>
+            <button class="sm secondary" onclick="toggleAddForm()">Cancel</button>
+          </div>
+          <div class="status" id="add-status"></div>
         </div>
+      </div>
 
-        <div class="history-filter">
+      <div class="history-filter">
+        <div class="field">
+          <label>From</label>
+          <input type="date" id="hist-start" />
+        </div>
+        <div class="field">
+          <label>To</label>
+          <input type="date" id="hist-end" />
+        </div>
+        <button class="sm" onclick="loadHistory()" style="margin-bottom:0;flex-shrink:0">Query</button>
+      </div>
+      <div id="event-list"><span class="empty">Select a date range and query.</span></div>
+    </div>
+  </div>
+
+  <!-- STATISTICS CARD -->
+  <div class="card">
+    <div class="card-inner">
+      <div class="section-label">Statistics</div>
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('stats', 'single', this)">Single Date</button>
+        <button class="tab" onclick="switchTab('stats', 'range', this)">Date Range</button>
+      </div>
+
+      <div id="stats-single" class="tab-panel active">
+        <div class="field">
+          <label>Date</label>
+          <input type="date" id="stats-s-date" />
+        </div>
+        <button class="full" onclick="queryStats('single')">Query</button>
+      </div>
+
+      <div id="stats-range" class="tab-panel">
+        <div class="row">
           <div class="field">
             <label>From</label>
-            <input type="date" id="hist-start" />
+            <input type="date" id="stats-r-start" />
           </div>
           <div class="field">
             <label>To</label>
-            <input type="date" id="hist-end" />
+            <input type="date" id="stats-r-end" />
           </div>
-          <button class="sm" onclick="loadHistory()" style="margin-bottom:0;align-self:flex-end">Query</button>
         </div>
-        <div id="event-list"><span class="empty">Select a date range and query.</span></div>
+        <button class="full" onclick="queryStats('range')">Query</button>
       </div>
-    </div>
-  </div>
 
-  <!-- STATISTICS ACCORDION -->
-  <div class="card">
-    <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this, 'stats-body')">
-      <span class="accordion-trigger-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/>
-        </svg>
-        Statistics
-      </span>
-      <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9l6 6 6-6"/>
-      </svg>
-    </button>
-    <div class="accordion-body" id="stats-body">
-      <div class="stats-inner">
-        <div class="tabs">
-          <button class="tab active" onclick="switchTab('stats', 'single', this)">Single Date</button>
-          <button class="tab" onclick="switchTab('stats', 'range', this)">Date Range</button>
-        </div>
-
-        <div id="stats-single" class="tab-panel active">
-          <div class="field">
-            <label>Date</label>
-            <input type="date" id="stats-s-date" />
-          </div>
-          <button class="full" onclick="queryStats('single')">Query</button>
-        </div>
-
-        <div id="stats-range" class="tab-panel">
-          <div class="row">
-            <div class="field">
-              <label>From</label>
-              <input type="date" id="stats-r-start" />
-            </div>
-            <div class="field">
-              <label>To</label>
-              <input type="date" id="stats-r-end" />
-            </div>
-          </div>
-          <button class="full" onclick="queryStats('range')">Query</button>
-        </div>
-
-        <div class="status error" id="stats-status"></div>
-        <div id="stats-result"></div>
-      </div>
+      <div class="status error" id="stats-status"></div>
+      <div id="stats-result"></div>
     </div>
   </div>
 
@@ -811,25 +795,6 @@
 
 <script>
   const API = window.location.origin;
-
-  // ── THEME ──
-  function applyTheme(theme) {
-    document.documentElement.classList.toggle('light', theme === 'light');
-    document.getElementById('theme-btn').textContent = theme === 'light' ? '🌙' : '☀️';
-  }
-
-  function toggleTheme() {
-    const next = document.documentElement.classList.contains('light') ? 'dark' : 'light';
-    localStorage.setItem('tl_theme', next);
-    applyTheme(next);
-  }
-
-  // ── ACCORDION ──
-  function toggleAccordion(btn, bodyId) {
-    const body = document.getElementById(bodyId);
-    const isOpen = body.classList.toggle('open');
-    btn.setAttribute('aria-expanded', isOpen);
-  }
 
   // ── AUTH ──
   function getToken() { return localStorage.getItem("tl_token"); }
@@ -922,6 +887,11 @@
             ${l}
           </button>`).join("")
       : `<span class="empty">Add labels to get started.</span>`;
+  }
+
+  function toggleLabels(btn) {
+    const body = document.getElementById("labels-body");
+    btn.setAttribute("aria-expanded", body.classList.toggle("open"));
   }
 
   async function addLabel() {
@@ -1075,7 +1045,7 @@
     const opts = labels.map(l => `<option value="${l}" ${l === evLabel ? "selected" : ""}>${l}</option>`).join("");
     row.outerHTML = `
       <div class="event-edit-form" id="ev-${id}">
-        <div class="section-label" style="margin:0 0 0.25rem">Edit Entry</div>
+        <div class="section-label" style="margin:0 0 0.5rem">Edit Entry</div>
         <div class="field">
           <label>Label</label>
           <select id="edit-label-${id}">${opts}</select>
@@ -1199,7 +1169,9 @@
     const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
     const colorMap = {};
     sorted.forEach(([label], i) => { colorMap[label] = PALETTE[i % PALETTE.length]; });
+
     const totalMins = Object.values(minutes).reduce((a, b) => a + b, 0);
+
     const slices = sorted.map(([label, pct]) => ({ pct, color: colorMap[label] }));
 
     const summary = `
@@ -1233,7 +1205,6 @@
 
   function buildPie(slices) {
     const R = 68, CX = 88, CY = 88, C = 2 * Math.PI * R;
-    const holeColor = getComputedStyle(document.documentElement).getPropertyValue('--pie-hole').trim();
     let paths = "", offset = 0;
     if (slices.length === 1) {
       paths = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${slices[0].color}" />`;
@@ -1246,13 +1217,18 @@
         offset += dash;
       }
     }
-    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 16}" fill="${holeColor}" />`;
+    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 16}" fill="#27272d" />`;
     return `<svg width="176" height="176" viewBox="0 0 176 176">${paths}</svg>`;
   }
 
   // ── UTILS ──
-  function localDateToUTCStart(dateStr) { return new Date(dateStr + "T00:00:00").toISOString(); }
-  function localDateToUTCEnd(dateStr) { return new Date(dateStr + "T23:59:59.999").toISOString(); }
+  function localDateToUTCStart(dateStr) {
+    return new Date(dateStr + "T00:00:00").toISOString();
+  }
+
+  function localDateToUTCEnd(dateStr) {
+    return new Date(dateStr + "T23:59:59.999").toISOString();
+  }
 
   function utcToLocalInput(utcStr) {
     const d = new Date(utcStr);
@@ -1266,7 +1242,9 @@
 
   function fmtDuration(startUTC, endUTC) {
     const totalSecs = Math.round((new Date(endUTC) - new Date(startUTC)) / 1000);
-    const s = totalSecs % 60, m = Math.floor(totalSecs / 60) % 60, h = Math.floor(totalSecs / 3600);
+    const s = totalSecs % 60;
+    const m = Math.floor(totalSecs / 60) % 60;
+    const h = Math.floor(totalSecs / 3600);
     if (h > 0) return `${h}h ${m}m ${s}s`;
     if (m > 0) return `${m}m ${s}s`;
     return `${s}s`;
@@ -1274,15 +1252,15 @@
 
   function fmtMins(mins) {
     const totalSecs = Math.round(mins * 60);
-    const s = totalSecs % 60, m = Math.floor(totalSecs / 60) % 60, h = Math.floor(totalSecs / 3600);
+    const s = totalSecs % 60;
+    const m = Math.floor(totalSecs / 60) % 60;
+    const h = Math.floor(totalSecs / 3600);
     if (h > 0) return `${h}h ${m}m ${s}s`;
     if (m > 0) return `${m}m ${s}s`;
     return `${s}s`;
   }
 
   // ── BOOT ──
-  applyTheme(localStorage.getItem('tl_theme') || 'dark');
-
   if (getToken()) {
     apiFetch(`${API}/labels`).then(res => { if (res.ok) showApp(); }).catch(() => showLogin());
   } else {
