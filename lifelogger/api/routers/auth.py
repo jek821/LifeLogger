@@ -4,6 +4,8 @@ from fastapi.security import HTTPAuthorizationCredentials
 from lifelogger.api.deps import bearer, limiter, require_auth
 from lifelogger.api.schemas import (
     ChangePasswordRequest,
+    ChangeUsernameRequest,
+    DeleteAccountRequest,
     LoginRequest,
     RegisterRequest,
     UpdateProfileRequest,
@@ -13,8 +15,11 @@ from lifelogger.services.users import (
     authenticate_user,
     change_password,
     create_user,
+    delete_own_account,
     get_user_by_id,
     update_display_name,
+    update_username,
+    verify_user_password,
 )
 
 router = APIRouter(tags=["auth"])
@@ -76,3 +81,30 @@ def change_password_endpoint(
     if not change_password(user_id, body.current_password, body.new_password):
         raise HTTPException(status_code=400, detail="Current password is incorrect.")
     return {"ok": True, "detail": "Password updated. Use it next time you sign in."}
+
+
+@router.patch("/me/username")
+@limiter.limit("10/minute")
+def change_username_endpoint(
+    request: Request, body: ChangeUsernameRequest, user_id: int = Depends(require_auth)
+):
+    if not verify_user_password(user_id, body.current_password):
+        raise HTTPException(status_code=400, detail="Current password is incorrect.")
+    user = update_username(user_id, body.username)
+    if not user:
+        raise HTTPException(status_code=409, detail="Username already taken or invalid.")
+    token = create_session(user_id)
+    return {**user, "token": token}
+
+
+@router.post("/me/delete-account")
+@limiter.limit("5/minute")
+def delete_account_endpoint(
+    request: Request, body: DeleteAccountRequest, user_id: int = Depends(require_auth)
+):
+    ok, err = delete_own_account(user_id, body.password)
+    if not ok:
+        if err == "wrong_password":
+            raise HTTPException(status_code=400, detail="Password is incorrect.")
+        raise HTTPException(status_code=400, detail=err)
+    return {"ok": True, "detail": "Account and all associated data were removed."}

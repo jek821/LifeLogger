@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Life Logger</title>
+  <link rel="icon" href="/assets/icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/icon.png" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
@@ -34,7 +36,7 @@
       <div class="forgot-password-wrap">
         <button type="button" class="forgot-password-toggle" id="forgot-pw-toggle" aria-expanded="false" aria-controls="forgot-pw-panel" onclick="toggleForgotPassword()">Forgot password?</button>
         <div class="forgot-password-panel" id="forgot-pw-panel" role="region" aria-label="Forgot password help">
-          Contact your Life Logger administrator. They can set a <strong>temporary password</strong> for your account. Sign in with it, open <strong>Account</strong> in the app, and choose a new password there.
+          Contact your Life Logger administrator. They can set a <strong>temporary password</strong> for your account. Sign in with it, open <strong>Settings</strong> (gear icon), and choose a new password there.
         </div>
       </div>
       <p class="auth-switch">New here? <a href="#" onclick="showRegisterPanel(); return false;">Create an account</a></p>
@@ -72,6 +74,12 @@
       <h1 id="user-name-display">My Log</h1>
     </div>
     <div class="header-actions">
+      <a class="header-btn icon-only" href="/settings" title="Settings" aria-label="Settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M9.594 3.94c.09-.542.56-.94 1.11-.94h2.593c.55 0 1.02.398 1.11.94l.213 1.281c.063.374.313.686.645.87.074.04.147.083.22.127.324.196.72.257 1.075.124l1.217-.456a1.125 1.125 0 0 1 1.37.49l1.296 2.247a1.125 1.125 0 0 1-.26 1.431l-1.003.827c-.293.24-.438.613-.431.992a6.759 6.759 0 0 1 0 .255c-.007.378.138.75.43.99l1.005.828c.424.35.534.954.26 1.43l-1.298 2.247a1.125 1.125 0 0 1-1.369.491l-1.217-.456c-.355-.133-.75-.072-1.076.124a6.57 6.57 0 0 1-.22.128c-.331.183-.581.495-.644.869l-.213 1.28c-.09.543-.56.941-1.11.941h-2.594c-.55 0-1.02-.398-1.11-.94l-.213-1.281c-.062-.374-.312-.686-.644-.87a6.52 6.52 0 0 1-.22-.127c-.325-.196-.72-.257-1.076-.124l-1.217.456a1.125 1.125 0 0 1-1.369-.49l-1.297-2.247a1.125 1.125 0 0 1 .26-1.431l1.004-.827c.292-.24.437-.613.43-.992a6.932 6.932 0 0 1 0-.255c.007-.378-.138-.75-.43-.99l-1.004-.828a1.125 1.125 0 0 1-.26-1.43l1.297-2.247a1.125 1.125 0 0 1 1.37-.491l1.216.456c.356.133.751.072 1.076-.124.072-.044.146-.087.22-.128.332-.183.582-.495.644-.869l.214-1.281Z"/>
+          <path d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/>
+        </svg>
+      </a>
       <button class="header-btn icon-only" onclick="cycleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
       <a class="header-btn" href="/admin" id="admin-link" style="display:none" title="Creator admin panel">Admin</a>
       <a class="header-btn" href="/developer">API</a>
@@ -233,43 +241,6 @@
 
         <div class="status error" id="stats-status"></div>
         <div id="stats-result"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ACCOUNT ACCORDION -->
-  <div class="card">
-    <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this, 'account-body')">
-      <span class="accordion-trigger-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
-        </svg>
-        Account
-      </span>
-      <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M6 9l6 6 6-6"/>
-      </svg>
-    </button>
-    <div class="accordion-body" id="account-body">
-      <div class="card-inner">
-        <div class="section-label">Change password</div>
-        <p style="font-size:0.8rem;color:var(--text2);margin-bottom:1rem;line-height:1.5">
-          If an administrator gave you a temporary password, sign in with it, then set your own password here. You’ll need your <strong>current</strong> password (including a temporary one) to continue.
-        </p>
-        <div class="field">
-          <label>Current password</label>
-          <input type="password" id="pw-current" autocomplete="current-password" />
-        </div>
-        <div class="field">
-          <label>New password</label>
-          <input type="password" id="pw-new" autocomplete="new-password" />
-        </div>
-        <div class="field">
-          <label>Confirm new password</label>
-          <input type="password" id="pw-new2" autocomplete="new-password" />
-        </div>
-        <button class="full" onclick="submitChangePassword()" style="margin-top:0.5rem">Update password</button>
-        <div class="status" id="pw-status"></div>
       </div>
     </div>
   </div>

@@ -6,7 +6,6 @@ import {
   registerNav,
   showLoginPanel,
   showRegisterPanel,
-  submitChangePassword,
   toggleForgotPassword,
 } from "./auth.js";
 import { addLabel, deleteLabel, loadLabels } from "./labels.js";
@@ -102,7 +101,6 @@ Object.assign(window, {
   addManualEntry,
   switchTab,
   queryStats,
-  submitChangePassword,
   deleteLabel,
   startEvent,
   showEditForm,

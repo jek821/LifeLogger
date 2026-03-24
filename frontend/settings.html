@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Settings — Life Logger</title>
+  <link rel="icon" href="/assets/icon.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/assets/icon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/css/index.css" />
+</head>
+<body>
+  <div class="settings-page">
+    <div class="app-header">
+      <div class="app-header-left settings-header-left">
+        <a href="/" class="header-btn" title="Back to app">← Back</a>
+        <h1>Settings</h1>
+      </div>
+      <div class="header-actions">
+        <button type="button" class="header-btn icon-only" id="settings-theme-btn" title="Toggle theme" aria-label="Toggle color theme">🌑</button>
+        <a class="header-btn" href="/admin" id="admin-link" style="display:none" title="Admin">Admin</a>
+        <button type="button" class="header-btn" id="settings-logout">Log out</button>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0.75rem">
+      <div class="card-inner">
+        <div class="section-label">Display name</div>
+        <p class="settings-hint">Shown in the app (for example in the page title and “Your Name’s Log”).</p>
+        <div class="field">
+          <label for="settings-display-name">Your name</label>
+          <input type="text" id="settings-display-name" autocomplete="name" />
+        </div>
+        <button type="button" class="full" id="btn-save-display-name">Save name</button>
+        <div class="status" id="status-display-name"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0.75rem">
+      <div class="card-inner">
+        <div class="section-label">Username</div>
+        <p class="settings-hint">Used to sign in. You must enter your current password. Other devices will be signed out until you sign in again.</p>
+        <div class="field">
+          <label for="settings-username">Username</label>
+          <input type="text" id="settings-username" autocomplete="username" />
+        </div>
+        <div class="field">
+          <label for="settings-username-password">Current password</label>
+          <input type="password" id="settings-username-password" autocomplete="current-password" />
+        </div>
+        <button type="button" class="full" id="btn-save-username">Change username</button>
+        <div class="status" id="status-username"></div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-bottom:0.75rem">
+      <div class="card-inner">
+        <div class="section-label">Password</div>
+        <p class="settings-hint">If an admin gave you a temporary password, set your own here. You need your current password to continue.</p>
+        <div class="field">
+          <label for="settings-pw-current">Current password</label>
+          <input type="password" id="settings-pw-current" autocomplete="current-password" />
+        </div>
+        <div class="field">
+          <label for="settings-pw-new">New password</label>
+          <input type="password" id="settings-pw-new" autocomplete="new-password" />
+        </div>
+        <div class="field">
+          <label for="settings-pw-new2">Confirm new password</label>
+          <input type="password" id="settings-pw-new2" autocomplete="new-password" />
+        </div>
+        <button type="button" class="full" id="btn-save-password">Update password</button>
+        <div class="status" id="status-password"></div>
+      </div>
+    </div>
+
+    <div class="card settings-danger-card">
+      <div class="card-inner">
+        <div class="section-label">Delete account</div>
+        <p class="settings-hint">Permanently delete your account and all labels, time entries, and sessions. This cannot be undone.</p>
+        <div class="field">
+          <label for="settings-delete-password">Your password</label>
+          <input type="password" id="settings-delete-password" autocomplete="current-password" />
+        </div>
+        <button type="button" class="full danger" id="btn-delete-account">Delete my account and all data</button>
+        <div class="status" id="status-delete"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/assets/js/settings-app.js"></script>
+</body>
+</html>

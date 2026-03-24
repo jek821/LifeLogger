@@ -79,6 +79,28 @@ def update_display_name(user_id: int, display_name: str) -> dict | None:
     return _user_to_dict(row) if row else None
 
 
+def verify_user_password(user_id: int, password: str) -> bool:
+    with get_db() as conn:
+        row = conn.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
+    return bool(row and _verify_password(password, row["password_hash"]))
+
+
+def update_username(user_id: int, new_username: str) -> dict | None:
+    new_username = new_username.strip().lower()
+    if not new_username:
+        return None
+    try:
+        with get_db() as conn:
+            cur = conn.execute("UPDATE users SET username = ? WHERE id = ?", (new_username, user_id))
+            if cur.rowcount == 0:
+                return None
+            conn.commit()
+            row = conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()
+        return _user_to_dict(row) if row else None
+    except sqlite3.IntegrityError:
+        return None
+
+
 def change_password(user_id: int, current_password: str, new_password: str) -> bool:
     with get_db() as conn:
         row = conn.execute("SELECT password_hash FROM users WHERE id = ?", (user_id,)).fetchone()
@@ -113,6 +135,39 @@ def list_all_users() -> list[dict]:
         }
         for r in rows
     ]
+
+
+def can_delete_own_account(user_id: int) -> tuple[bool, str | None]:
+    if not user_is_admin(user_id):
+        return True, None
+    with get_db() as conn:
+        n = conn.execute("SELECT COUNT(*) FROM users WHERE is_admin = 1").fetchone()[0]
+    if n <= 1:
+        return (
+            False,
+            "You are the only administrator. Promote another user to admin before deleting your account.",
+        )
+    return True, None
+
+
+def delete_own_account(user_id: int, password: str) -> tuple[bool, str | None]:
+    """
+    Delete this user and all their sessions, labels, and events.
+    Returns (True, None) on success, or (False, error_detail) where error_detail is
+    either 'wrong_password' or a human-readable string for HTTP 400.
+    """
+    if not verify_user_password(user_id, password):
+        return False, "wrong_password"
+    allowed, err = can_delete_own_account(user_id)
+    if not allowed:
+        return False, err
+    with get_db() as conn:
+        conn.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+        conn.execute("DELETE FROM labels WHERE user_id = ?", (user_id,))
+        conn.execute("DELETE FROM events WHERE user_id = ?", (user_id,))
+        conn.execute("DELETE FROM users WHERE id = ?", (user_id,))
+        conn.commit()
+    return True, None
 
 
 def delete_user_cascade(target_id: int, admin_id: int) -> bool:

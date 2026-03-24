@@ -724,3 +724,39 @@
 
     .row { display: flex; gap: 0.5rem; }
     .row .field { flex: 1; }
+
+    .header-btn svg { display: block; }
+
+    /* Settings page */
+    .settings-page {
+      width: 100%;
+      max-width: 520px;
+      margin: 0 auto;
+      padding: 0.75rem 0.75rem 3rem;
+      min-height: 100dvh;
+      box-sizing: border-box;
+    }
+    .settings-header-left {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .settings-header-left h1 {
+      margin: 0;
+      font-size: 1.15rem;
+    }
+    .settings-hint {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.5;
+      margin-bottom: 1rem;
+    }
+    .settings-danger-card {
+      border-color: rgba(248, 113, 113, 0.35);
+      background: linear-gradient(180deg, rgba(248, 113, 113, 0.06) 0%, transparent 40%);
+    }
+    .settings-danger-card .section-label {
+      color: var(--error);
+    }

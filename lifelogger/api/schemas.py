@@ -23,6 +23,15 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., min_length=6, max_length=256)
 
 
+class ChangeUsernameRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=64)
+    current_password: str = Field(..., max_length=256)
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str = Field(..., max_length=256)
+
+
 class AddLabelRequest(BaseModel):
     label: str = Field(..., max_length=LABEL_MAX_LEN)
 

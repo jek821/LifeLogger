@@ -15,7 +15,8 @@ Under the hood it’s multi-user SQLite, a FastAPI API, and a static frontend (n
 | `api.py` | Thin ASGI entrypoint (`uvicorn api:app` imports the real app from the package). |
 | `lifelogger/` | Python package: database (`db.py`), settings (`config.py`), domain logic (`services/`), HTTP layer (`api/`). |
 | `lifelogger/api/routers/` | One module per area (auth, labels, events, stats, admin, static pages). |
-| `frontend/` | HTML pages; **main app** styles in `css/index.css`, behavior in `js/` (ES modules, entry `js/app.js`). Static files are exposed at `/assets/…`. |
+| `frontend/` | HTML pages (`index.html`, `settings.html`, `developer.html`, `admin.html`); shared styles in `css/index.css`; JS in `js/` (entries `app.js`, `settings-app.js`). Static files are served under `/assets/…`. |
+| `frontend/icon.png` | App icon (favicon and Apple touch icon). The only copy tracked in the repo; served at `/assets/icon.png` and `/favicon.ico`. |
 | `timelogger.db` | SQLite file (created at the **repository root** on first run). |
 
 Initialize the database without starting the server:
@@ -51,43 +52,75 @@ Open the frontend and click **Create an account** on the login screen. Enter you
 
 ---
 
-## VPS Deployment (DigitalOcean + nginx + HTTPS)
+## VPS deployment (DigitalOcean Droplet + Ubuntu + nginx + HTTPS)
 
-### 1. Provision the server
+These steps assume an **Ubuntu 22.04 or 24.04 LTS** Droplet on [DigitalOcean](https://www.digitalocean.com/), SSH access as a user with `sudo`, and a **domain name** whose `A` record points at the Droplet’s public IPv4 address (required before Let’s Encrypt can issue a certificate).
 
-Create a Ubuntu droplet on DigitalOcean. Point your domain's `A` record to the droplet's IP before continuing — Let's Encrypt needs DNS to resolve for certificate issuance.
+### 1. Create the Droplet and DNS
 
-### 2. Install dependencies
+1. In DigitalOcean: **Create → Droplets** — choose Ubuntu 22.04/24.04, a size that fits your traffic, and your region.
+2. Add an **SSH key** for login (recommended) or use a root password for the first boot only, then harden SSH.
+3. In your DNS host, create an **`A` record**: hostname (e.g. `life` or `@`) → **Droplet IPv4**. Wait until it resolves before step 7.
+
+### 2. Update the system
+
+SSH in (replace the address with yours):
 
 ```bash
-sudo apt update
-sudo apt install python3-pip nginx certbot python3-certbot-nginx -y
+ssh root@YOUR_DROPLET_IP
+# or: ssh ubuntu@YOUR_DROPLET_IP   # on some images the default user is `ubuntu`
 ```
-
-### 3. Clone the project
 
 ```bash
-git clone https://github.com/jek821/LifeLogger /opt/lifelogger
-cd /opt/lifelogger
-pip3 install -r requirements.txt
+sudo apt update && sudo apt upgrade -y
 ```
 
-### 4. Create a systemd service
+### 3. Install system packages
+
+```bash
+sudo apt install -y python3 python3-venv python3-pip nginx certbot python3-certbot-nginx
+```
+
+You do **not** need Node.js or a frontend build: the app serves `frontend/` and `/assets` directly from Python.
+
+### 4. Clone the app and create a virtual environment
+
+Using `/opt/lifelogger` matches the systemd unit below. Clone as **root**, then hand the tree to **`www-data`** (the default service user) so it can write **`timelogger.db`** and run **`git pull`** later without permission fights.
+
+```bash
+sudo git clone https://github.com/jek821/LifeLogger.git /opt/lifelogger
+sudo chown -R www-data:www-data /opt/lifelogger
+sudo -u www-data bash -c 'cd /opt/lifelogger && python3 -m venv venv && ./venv/bin/pip install --upgrade pip && ./venv/bin/pip install -r requirements.txt'
+```
+
+The SQLite file **`timelogger.db`** appears in `/opt/lifelogger` on first run. To initialize the database only (no HTTP server):
+
+```bash
+sudo -u www-data /opt/lifelogger/venv/bin/python -m lifelogger
+```
+
+### 5. systemd service
+
+Create a unit that runs **uvicorn** from the venv, bound to **localhost** only (nginx terminates TLS and proxies).
 
 ```bash
 sudo nano /etc/systemd/system/lifelogger.service
 ```
 
-Paste:
+Paste (adjust `User=` / `Group=` if you use a dedicated service account — see note below):
 
 ```ini
 [Unit]
-Description=Life Logger
+Description=Life Logger (FastAPI / uvicorn)
 After=network.target
 
 [Service]
+Type=simple
+User=www-data
+Group=www-data
 WorkingDirectory=/opt/lifelogger
-ExecStart=python3 -m uvicorn api:app --host 127.0.0.1 --port 8000
+Environment="PATH=/opt/lifelogger/venv/bin"
+ExecStart=/opt/lifelogger/venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5
 
@@ -95,76 +128,103 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-Enable and start it:
+Enable and start:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now lifelogger
-sudo systemctl status lifelogger   # verify it's running
+sudo systemctl status lifelogger
 ```
 
-### 5. Configure nginx
+If `status` shows **active (running)**, the API is listening on `127.0.0.1:8000`.
+
+**Dedicated user (optional):** Instead of `www-data`, you can use `sudo useradd -r -s /usr/sbin/nologin lifelogger`, set `User=lifelogger` and `Group=lifelogger`, and `sudo chown -R lifelogger:lifelogger /opt/lifelogger`.
+
+### 6. nginx reverse proxy
 
 ```bash
 sudo nano /etc/nginx/sites-available/lifelogger
 ```
 
-Paste (replace `yourdomain.com`):
+Paste (replace `yourdomain.com` with your hostname):
 
 ```nginx
-# Rate limit zones — defined outside the server block
-limit_req_zone $binary_remote_addr zone=auth:10m  rate=10r/m;
-limit_req_zone $binary_remote_addr zone=api:10m   rate=200r/m;
+limit_req_zone $binary_remote_addr zone=auth:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=api:10m rate=200r/m;
 
 server {
     listen 80;
+    listen [::]:80;
     server_name yourdomain.com;
 
-    # Stricter limit on auth endpoints (brute-force protection)
     location ~ ^/(login|register)$ {
         limit_req zone=auth burst=5 nodelay;
         proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
-    # General API limit
     location / {
         limit_req zone=api burst=30 nodelay;
         proxy_pass http://127.0.0.1:8000;
+        proxy_http_version 1.1;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 }
 ```
 
-Enable the site:
+Enable the site and reload nginx:
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/lifelogger /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
+sudo ln -sf /etc/nginx/sites-available/lifelogger /etc/nginx/sites-enabled/
+sudo rm -f /etc/nginx/sites-enabled/default
+sudo nginx -t && sudo systemctl reload nginx
 ```
 
-### 6. Issue SSL certificate
+### 7. HTTPS with Let’s Encrypt
 
 ```bash
 sudo certbot --nginx -d yourdomain.com
 ```
 
-Certbot will automatically update your nginx config for HTTPS and set up auto-renewal. Verify renewal works:
+Follow the prompts. Certbot will install the certificate and adjust the server block for HTTPS. Test renewal:
 
 ```bash
 sudo certbot renew --dry-run
 ```
 
-### 7. Open firewall ports
+### 8. Firewalls
 
-In the DigitalOcean control panel, ensure your droplet's firewall allows:
-- Port 80 (HTTP — nginx redirects to HTTPS)
-- Port 443 (HTTPS)
+- **On the Droplet (UFW),** if you use it:
 
-Port 8000 should **not** be exposed publicly since uvicorn binds to `127.0.0.1` only.
+  ```bash
+  sudo ufw allow OpenSSH
+  sudo ufw allow 'Nginx Full'
+  sudo ufw enable
+  sudo ufw status
+  ```
+
+- **In the DigitalOcean control panel,** if you use a **Cloud Firewall**, allow inbound **TCP 22** (SSH from your IP), **80**, and **443**. Do **not** expose **8000** publicly; the app should stay on `127.0.0.1:8000`.
+
+### 9. After deploy
+
+Open `https://yourdomain.com`. The first registered user becomes the **admin** if no admin exists yet. Use **Settings** (gear) and `/admin` as documented above.
+
+**Updates:** on the server:
+
+```bash
+sudo systemctl stop lifelogger
+sudo -u www-data bash -c 'cd /opt/lifelogger && git pull && ./venv/bin/pip install -r requirements.txt'
+sudo systemctl start lifelogger
+```
+
+(Replace `www-data` with your service user if you changed the unit file.)
 
 ---
 
@@ -203,6 +263,7 @@ labels   (user_id, label)
 - **History** — view, edit, and delete past events for a given date range.
 - **Statistics** — query a date range to see time per label as percentages and total minutes, sorted by usage.
 - **Developer** — API reference and token access for scripting against your own data.
+- **Settings** (`/settings`, gear icon on the main app) — change display name, username, or password; delete your account and all of your data (sole admin must promote someone else first).
 - **Admin** (`/admin`) — user management for accounts flagged `is_admin` (the first registered user is promoted automatically if no admin exists).
 
 ---
@@ -242,6 +303,24 @@ Returns the authenticated user's profile.
 Update your display name.
 ```json
 { "display_name": "New Name" }
+```
+
+#### `PATCH /me/username`
+Change your login username. Requires your current password. Returns a **new session token** (same shape as `GET /me` plus `"token"`); other sessions for your account are ended.
+```json
+{ "username": "newname", "current_password": "..." }
+```
+
+#### `POST /me/change-password`
+```json
+{ "current_password": "...", "new_password": "..." }
+```
+
+#### `POST /me/delete-account`
+Permanently deletes your user row and all of your sessions, labels, and events. Requires your password. Returns `400` if you are the only administrator (promote another admin first).
+
+```json
+{ "password": "..." }
 ```
 
 ---
@@ -333,7 +412,7 @@ Deletes a user and their sessions, labels, and events. You cannot delete your ow
 ```json
 { "temporary_password": "new-temp-secret" }
 ```
-Sets a new password and revokes that user’s sessions. Admins cannot reset their own password here (use **Profile → change password** in the main app).
+Sets a new password and revokes that user’s sessions. Admins cannot reset their own password here (use **Settings** in the main app).
 
 ---
 

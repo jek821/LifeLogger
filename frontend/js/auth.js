@@ -1,4 +1,4 @@
-import { API, apiFetch, clearName, clearToken, getName, setName, setToken } from "./api.js";
+import { API, clearName, clearToken, getName, setName, setToken } from "./api.js";
 import { setAdminNav } from "./theme.js";
 
 let nav = {
@@ -101,48 +101,4 @@ export async function logout() {
 
 function authHeadersForLogout() {
   return { "Content-Type": "application/json", Authorization: `Bearer ${localStorage.getItem("tl_token")}` };
-}
-
-export async function submitChangePassword() {
-  const cur = document.getElementById("pw-current").value;
-  const nw = document.getElementById("pw-new").value;
-  const nw2 = document.getElementById("pw-new2").value;
-  const status = document.getElementById("pw-status");
-  status.className = "status";
-  status.textContent = "";
-  if (!cur) {
-    status.className = "status error";
-    status.textContent = "Enter your current password.";
-    return;
-  }
-  if (nw.length < 6) {
-    status.className = "status error";
-    status.textContent = "New password must be at least 6 characters.";
-    return;
-  }
-  if (nw !== nw2) {
-    status.className = "status error";
-    status.textContent = "New passwords do not match.";
-    return;
-  }
-  try {
-    const res = await apiFetch(`${API}/me/change-password`, {
-      method: "POST",
-      body: JSON.stringify({ current_password: cur, new_password: nw }),
-    });
-    if (!res.ok) {
-      const e = await res.json();
-      throw new Error(e.detail);
-    }
-    const data = await res.json();
-    document.getElementById("pw-current").value = "";
-    document.getElementById("pw-new").value = "";
-    document.getElementById("pw-new2").value = "";
-    status.className = "status";
-    status.textContent = data.detail || "Password updated.";
-  } catch (e) {
-    if (e.message === "Unauthorized") return;
-    status.className = "status error";
-    status.textContent = e.message;
-  }
 }

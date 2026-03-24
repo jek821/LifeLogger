@@ -6,6 +6,11 @@ from lifelogger.config import FRONTEND_DIR
 router = APIRouter(tags=["pages"])
 
 
+@router.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return FileResponse(FRONTEND_DIR / "icon.png", media_type="image/png")
+
+
 @router.get("/")
 def serve_frontend():
     return FileResponse(FRONTEND_DIR / "index.html")
@@ -19,3 +24,8 @@ def serve_developer():
 @router.get("/admin")
 def serve_admin():
     return FileResponse(FRONTEND_DIR / "admin.html")
+
+
+@router.get("/settings")
+def serve_settings():
+    return FileResponse(FRONTEND_DIR / "settings.html")

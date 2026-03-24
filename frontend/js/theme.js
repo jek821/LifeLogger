@@ -15,6 +15,8 @@ export function applyTheme(theme) {
   if (appBtn) appBtn.textContent = icon;
   const loginBtn = document.getElementById("login-theme-btn");
   if (loginBtn) loginBtn.textContent = icon;
+  const settingsBtn = document.getElementById("settings-theme-btn");
+  if (settingsBtn) settingsBtn.textContent = icon;
 }
 
 export function cycleTheme() {
