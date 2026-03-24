@@ -1131,20 +1131,27 @@
   }
 
   function fmtLocalTime(utcStr) {
-    return new Date(utcStr).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+    return new Date(utcStr).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", second: "2-digit" });
   }
 
   function fmtDuration(startUTC, endUTC) {
-    const mins = (new Date(endUTC) - new Date(startUTC)) / 60000;
-    return fmtMins(mins);
+    const totalSecs = Math.round((new Date(endUTC) - new Date(startUTC)) / 1000);
+    const s = totalSecs % 60;
+    const m = Math.floor(totalSecs / 60) % 60;
+    const h = Math.floor(totalSecs / 3600);
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
   }
 
   function fmtMins(mins) {
-    const total = Math.round(mins);
-    if (total < 60) return `${total}m`;
-    const h = Math.floor(total / 60);
-    const m = total % 60;
-    return m === 0 ? `${h}h` : `${h}h ${m}m`;
+    const totalSecs = Math.round(mins * 60);
+    const s = totalSecs % 60;
+    const m = Math.floor(totalSecs / 60) % 60;
+    const h = Math.floor(totalSecs / 3600);
+    if (h > 0) return `${h}h ${m}m ${s}s`;
+    if (m > 0) return `${m}m ${s}s`;
+    return `${s}s`;
   }
 
   // ── BOOT ──
