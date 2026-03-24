@@ -600,7 +600,36 @@
   <!-- HISTORY CARD -->
   <div class="card">
     <div class="card-inner">
-      <div class="section-title">History</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
+        <div class="section-title" style="margin-bottom:0">History</div>
+        <button class="sm secondary" onclick="toggleAddForm()">+ Add entry</button>
+      </div>
+
+      <!-- Manual add form (hidden by default) -->
+      <div id="add-form" style="display:none;margin-bottom:1rem;">
+        <div class="event-edit-form">
+          <div class="field" style="margin-bottom:0">
+            <label>Label</label>
+            <select id="add-label"></select>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label>Start</label>
+              <input type="datetime-local" id="add-start" />
+            </div>
+            <div class="field">
+              <label>End</label>
+              <input type="datetime-local" id="add-end" />
+            </div>
+          </div>
+          <div class="event-edit-actions">
+            <button class="sm" onclick="addManualEntry()">Save</button>
+            <button class="sm secondary" onclick="toggleAddForm()">Cancel</button>
+          </div>
+          <div class="status" id="add-status"></div>
+        </div>
+      </div>
+
       <div class="history-controls">
         <div class="field">
           <label>Start</label>
@@ -875,59 +904,18 @@
     const end = document.getElementById("hist-end").value;
     const list = document.getElementById("event-list");
     if (!start || !end) { list.innerHTML = `<span class="empty">Pick a date range.</span>`; return; }
-
-    const startUTC = localDateToUTCStart(start);
-    const endUTC = localDateToUTCEnd(end);
-
     try {
-      const res = await apiFetch(`${API}/events?start=${encodeURIComponent(startUTC)}&end=${encodeURIComponent(endUTC)}`);
+      const res = await apiFetch(`${API}/events?start=${encodeURIComponent(localDateToUTCStart(start))}&end=${encodeURIComponent(localDateToUTCEnd(end))}`);
       if (!res.ok) throw new Error((await res.json()).detail);
-      const { events } = await res.json();
-      renderEventList(events);
+      renderEventList((await res.json()).events);
     } catch(e) { list.innerHTML = `<span class="empty">${e.message}</span>`; }
   }
 
   function renderEventList(events) {
     const list = document.getElementById("event-list");
     if (!events.length) { list.innerHTML = `<span class="empty">No events in this range.</span>`; return; }
-
-    list.innerHTML = events.map(ev => `
-      <div class="event-row" id="ev-${ev.id}">
-        <div class="event-dot"></div>
-        <div class="event-info">
-          <div class="event-label">${ev.label}</div>
-          <div class="event-time">${fmtLocalTime(ev.started_at)} → ${ev.ended_at ? fmtLocalTime(ev.ended_at) : "active"}</div>
-        </div>
-        <div class="event-duration">${ev.ended_at ? fmtDuration(ev.started_at, ev.ended_at) : "—"}</div>
-        <div class="event-actions">
-          <button class="icon-btn" onclick="showEditForm(${ev.id})" title="Edit">✎</button>
-          <button class="icon-btn danger" onclick="deleteEvent(${ev.id})" title="Delete">✕</button>
-        </div>
-      </div>
-    `).join("");
-  }
-
-  function showEditForm(id) {
-    const row = document.getElementById(`ev-${id}`);
-    // parse current values from the row
-    const label = row.querySelector(".event-label").textContent.trim();
-    const timeParts = row.querySelector(".event-time").textContent.split(" → ");
-    const isActive = timeParts[1] === "active";
-
-    // We need the raw UTC values — re-fetch them from a data attribute
-    // Store UTC on render instead
-    loadHistory(); // easiest: just refresh and show edit inline after re-render
-    // Actually, let's store data on the element properly:
-  }
-
-  // Better approach: store UTC values as data attributes on render
-  function renderEventListWithData(events) {
-    const list = document.getElementById("event-list");
-    if (!events.length) { list.innerHTML = `<span class="empty">No events in this range.</span>`; return; }
-
     list.innerHTML = `<div class="event-list">${events.map(ev => `
       <div class="event-row" id="ev-${ev.id}"
-           data-id="${ev.id}"
            data-label="${ev.label}"
            data-start="${ev.started_at}"
            data-end="${ev.ended_at || ''}">
@@ -941,42 +929,18 @@
           <button class="icon-btn" onclick="showEditForm(${ev.id})" title="Edit">✎</button>
           <button class="icon-btn danger" onclick="deleteHistEvent(${ev.id})" title="Delete">✕</button>
         </div>
-      </div>
-    `).join("")}</div>`;
-  }
-
-  // Override loadHistory to use the better renderer
-  async function loadHistory() {
-    const start = document.getElementById("hist-start").value;
-    const end = document.getElementById("hist-end").value;
-    const list = document.getElementById("event-list");
-    if (!start || !end) { list.innerHTML = `<span class="empty">Pick a date range.</span>`; return; }
-
-    const startUTC = localDateToUTCStart(start);
-    const endUTC = localDateToUTCEnd(end);
-
-    try {
-      const res = await apiFetch(`${API}/events?start=${encodeURIComponent(startUTC)}&end=${encodeURIComponent(endUTC)}`);
-      if (!res.ok) throw new Error((await res.json()).detail);
-      renderEventListWithData((await res.json()).events);
-    } catch(e) { list.innerHTML = `<span class="empty">${e.message}</span>`; }
+      </div>`).join("")}</div>`;
   }
 
   function showEditForm(id) {
     const row = document.getElementById(`ev-${id}`);
-    const evLabel = row.dataset.label;
-    const evStart = row.dataset.start;
-    const evEnd = row.dataset.end;
-
-    const labelOptions = labels.map(l =>
-      `<option value="${l}" ${l === evLabel ? "selected" : ""}>${l}</option>`
-    ).join("");
-
+    const { label: evLabel, start: evStart, end: evEnd } = row.dataset;
+    const opts = labels.map(l => `<option value="${l}" ${l === evLabel ? "selected" : ""}>${l}</option>`).join("");
     row.outerHTML = `
       <div class="event-edit-form" id="ev-${id}">
         <div class="field" style="margin-bottom:0">
           <label>Label</label>
-          <select id="edit-label-${id}">${labelOptions}</select>
+          <select id="edit-label-${id}">${opts}</select>
         </div>
         <div class="row">
           <div class="field">
@@ -1001,16 +965,11 @@
     const startLocal = document.getElementById(`edit-start-${id}`).value;
     const endLocal = document.getElementById(`edit-end-${id}`).value;
     const status = document.getElementById(`edit-status-${id}`);
-
     if (!startLocal) { status.className = "status error"; status.textContent = "Start time required."; return; }
-
-    const started_at = new Date(startLocal).toISOString();
-    const ended_at = endLocal ? new Date(endLocal).toISOString() : null;
-
     try {
       const res = await apiFetch(`${API}/event/${id}`, {
         method: "PATCH",
-        body: JSON.stringify({ label, started_at, ended_at }),
+        body: JSON.stringify({ label, started_at: new Date(startLocal).toISOString(), ended_at: endLocal ? new Date(endLocal).toISOString() : null }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
       loadHistory();
@@ -1021,9 +980,44 @@
     if (!confirm("Delete this event?")) return;
     try {
       const res = await apiFetch(`${API}/event/${id}`, { method: "DELETE" });
-      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      if (!res.ok) throw new Error((await res.json()).detail);
       loadHistory();
     } catch(e) { alert(e.message); }
+  }
+
+  function toggleAddForm() {
+    const form = document.getElementById("add-form");
+    const visible = form.style.display !== "none";
+    form.style.display = visible ? "none" : "block";
+    if (!visible) {
+      // pre-fill with current local datetime
+      const now = utcToLocalInput(new Date().toISOString());
+      document.getElementById("add-start").value = now;
+      document.getElementById("add-end").value = now;
+      const sel = document.getElementById("add-label");
+      sel.innerHTML = labels.map(l => `<option value="${l}">${l}</option>`).join("");
+    }
+  }
+
+  async function addManualEntry() {
+    const label = document.getElementById("add-label").value;
+    const startLocal = document.getElementById("add-start").value;
+    const endLocal = document.getElementById("add-end").value;
+    const status = document.getElementById("add-status");
+    if (!startLocal) { status.className = "status error"; status.textContent = "Start time required."; return; }
+    try {
+      const res = await apiFetch(`${API}/event/manual`, {
+        method: "POST",
+        body: JSON.stringify({
+          label,
+          started_at: new Date(startLocal).toISOString(),
+          ended_at: endLocal ? new Date(endLocal).toISOString() : null,
+        }),
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      toggleAddForm();
+      loadHistory();
+    } catch(e) { status.className = "status error"; status.textContent = e.message; }
   }
 
   // ── STATS ──

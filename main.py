@@ -142,6 +142,17 @@ def update_event(event_id: int, label: str, started_at: str, ended_at: str | Non
     return _row_to_dict(row) if row else None
 
 
+def add_event(label: str, started_at: str, ended_at: str | None) -> dict:
+    with get_db() as conn:
+        cur = conn.execute(
+            "INSERT INTO events (label, started_at, ended_at) VALUES (?, ?, ?)",
+            (label, started_at, ended_at),
+        )
+        conn.commit()
+        row = conn.execute("SELECT * FROM events WHERE id = ?", (cur.lastrowid,)).fetchone()
+    return _row_to_dict(row)
+
+
 def delete_event(event_id: int) -> bool:
     with get_db() as conn:
         cur = conn.execute("DELETE FROM events WHERE id = ?", (event_id,))

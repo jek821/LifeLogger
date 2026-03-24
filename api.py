@@ -10,7 +10,7 @@ from main import (
     init_db,
     get_labels, add_label, delete_label,
     get_active_event, start_event, end_active_event,
-    get_events, update_event, delete_event,
+    get_events, add_event, update_event, delete_event,
     get_statistics,
 )
 
@@ -45,9 +45,14 @@ class AddLabelRequest(BaseModel):
 class StartEventRequest(BaseModel):
     label: str
 
+class ManualEventRequest(BaseModel):
+    label: str
+    started_at: str
+    ended_at: str | None = None
+
 class UpdateEventRequest(BaseModel):
     label: str
-    started_at: str   # UTC ISO string
+    started_at: str
     ended_at: str | None = None
 
 
@@ -113,6 +118,14 @@ def end_event_endpoint(_: None = Depends(require_auth)):
     if not event:
         raise HTTPException(status_code=404, detail="No active event to end.")
     return {"event": event}
+
+
+@app.post("/event/manual")
+def add_manual_event(body: ManualEventRequest, _: None = Depends(require_auth)):
+    valid = get_labels()
+    if valid and body.label not in valid:
+        raise HTTPException(status_code=400, detail=f"'{body.label}' is not a valid label.")
+    return {"event": add_event(body.label, body.started_at, body.ended_at)}
 
 
 @app.get("/events")
