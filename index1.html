@@ -2,43 +2,33 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Jacob's Life Logger</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --accent:      #e85d3a;
-      --accent-dark: #c94825;
-      --accent-soft: rgba(232, 93, 58, 0.1);
-      --bg:          #1e1e22;
-      --surface:     #27272d;
-      --surface2:    #303038;
-      --border:      rgba(255,255,255,0.09);
-      --border2:     rgba(255,255,255,0.15);
-      --text:        #f0ede8;
-      --text2:       #a8a4a0;
-      --text3:       #6e6a66;
-      --success:     #4ade80;
-      --error:       #f87171;
-      --radius:      14px;
-      --radius-sm:   9px;
-      --font:        'DM Sans', sans-serif;
-      --mono:        'DM Mono', monospace;
+      --accent:      #6366f1;
+      --accent-dark: #4f46e5;
+      --bg:          #f1f1f3;
+      --card:        #fff;
+      --border:      #e5e5e5;
+      --muted:       #f7f7f8;
+      --text:        #1a1a1a;
+      --subtext:     #888;
+      --success:     #16a34a;
+      --error:       #dc2626;
     }
 
     body {
-      font-family: var(--font);
+      font-family: system-ui, -apple-system, sans-serif;
       background: var(--bg);
       color: var(--text);
-      min-height: 100dvh;
+      min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+      padding: 1rem 0.75rem 3rem;
     }
 
     /* ── LOGIN ── */
@@ -50,173 +40,136 @@
       align-items: center;
       justify-content: center;
       z-index: 100;
-      padding: 1.5rem;
+      padding: 1rem;
     }
     #login-overlay.hidden { display: none; }
 
     .login-card {
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: var(--radius);
-      padding: 2rem 1.75rem;
+      background: var(--card);
+      border-radius: 16px;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.08);
+      padding: 2rem 1.5rem;
       width: 100%;
-      max-width: 340px;
+      max-width: 360px;
     }
-
-    .login-card .wordmark {
-      font-size: 0.7rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.4rem;
-    }
-
     .login-card h2 {
-      font-size: 1.45rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin-bottom: 1.75rem;
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 1.5rem;
     }
 
     /* ── APP SHELL ── */
     #app {
       display: none;
       width: 100%;
-      max-width: 520px;
+      max-width: 480px;
       flex-direction: column;
       align-items: stretch;
-      gap: 0.75rem;
-      padding: 0.75rem 0.75rem 4rem;
+      gap: 0.875rem;
     }
 
     .app-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 0.75rem 0.25rem 0.5rem;
-    }
-
-    .app-header-left .wordmark {
-      font-size: 0.62rem;
-      font-weight: 500;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: var(--accent);
-      margin-bottom: 0.15rem;
+      padding: 0.25rem 0;
+      margin-bottom: 0.25rem;
     }
 
     h1 {
-      font-size: 1.15rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--text);
+      font-size: 1.25rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
     }
 
     /* ── CARD ── */
     .card {
-      background: var(--surface);
-      border-radius: var(--radius);
-      border: 1px solid var(--border);
+      background: var(--card);
+      border-radius: 14px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
       overflow: hidden;
     }
 
     .card-inner { padding: 1.25rem; }
 
-    .section-label {
-      font-size: 0.6rem;
-      font-weight: 500;
+    .section-title {
+      font-size: 0.68rem;
+      font-weight: 600;
       text-transform: uppercase;
-      letter-spacing: 0.14em;
-      color: var(--text3);
+      letter-spacing: 0.1em;
+      color: #aaa;
       margin-bottom: 1rem;
     }
 
     /* ── TIMER ── */
-    .timer-body {
-      padding: 1.5rem 1.25rem 1.25rem;
+    .timer-display {
+      text-align: center;
+      padding: 1.25rem 0 1rem;
     }
 
-    .timer-top {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      margin-bottom: 1.25rem;
-    }
-
-    .timer-meta {
-      display: flex;
-      flex-direction: column;
-      gap: 0.2rem;
-    }
-
-    .timer-state {
-      font-size: 0.6rem;
-      font-weight: 500;
-      letter-spacing: 0.14em;
+    .timer-label {
+      font-size: 0.8rem;
+      font-weight: 600;
       text-transform: uppercase;
-      color: var(--text3);
+      letter-spacing: 0.08em;
+      color: var(--subtext);
+      margin-bottom: 0.3rem;
     }
 
     .timer-activity {
-      font-size: 1.3rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
+      font-size: 1.4rem;
+      font-weight: 700;
       color: var(--text);
-      min-height: 1.8rem;
+      letter-spacing: -0.4px;
+      margin-bottom: 0.2rem;
+      min-height: 2rem;
     }
-    .timer-activity.inactive { color: var(--text3); font-weight: 300; font-style: italic; }
+
+    .timer-activity.inactive { color: #ccc; font-weight: 400; }
+
+    .timer-elapsed {
+      font-size: 2.8rem;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -1px;
+      color: var(--accent);
+      line-height: 1;
+      margin-bottom: 0.2rem;
+      font-family: ui-monospace, monospace;
+    }
+
+    .timer-elapsed.inactive { color: #ddd; }
 
     .timer-since {
       font-size: 0.75rem;
-      color: var(--text2);
-      font-family: var(--mono);
-      margin-top: 0.15rem;
-      min-height: 1.1rem;
+      color: var(--subtext);
+      min-height: 1rem;
     }
-
-    .timer-elapsed-wrap {
-      text-align: right;
-      flex-shrink: 0;
-    }
-
-    .timer-elapsed {
-      font-size: 2.4rem;
-      font-weight: 400;
-      font-family: var(--mono);
-      letter-spacing: -0.03em;
-      color: var(--accent);
-      line-height: 1;
-    }
-    .timer-elapsed.inactive { color: var(--text3); }
 
     .label-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-      gap: 0.4rem;
-      margin-bottom: 0.85rem;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 0.5rem;
+      margin-bottom: 0.75rem;
     }
 
     .label-btn {
       padding: 0.6rem 0.5rem;
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border2);
-      background: var(--surface2);
-      color: var(--text2);
-      font-size: 0.8rem;
-      font-weight: 500;
-      font-family: var(--font);
+      border-radius: 9px;
+      border: 1.5px solid var(--border);
+      background: var(--muted);
+      color: var(--text);
+      font-size: 0.82rem;
+      font-weight: 600;
       cursor: pointer;
       transition: all 0.15s;
-      min-height: 42px;
+      min-height: 44px;
       text-align: center;
       -webkit-tap-highlight-color: transparent;
-      letter-spacing: -0.01em;
     }
 
-    .label-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-    .label-btn:active { transform: scale(0.96); }
+    .label-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef; }
+    .label-btn:active { transform: scale(0.97); }
 
     .label-btn.active-label {
       background: var(--accent);
@@ -224,11 +177,9 @@
       color: #fff;
     }
 
-    .timer-footer {
+    .timer-stop-row {
       display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      min-height: 2rem;
+      justify-content: center;
     }
 
     /* ── LABELS ACCORDION ── */
@@ -237,26 +188,26 @@
       justify-content: space-between;
       align-items: center;
       width: 100%;
-      padding: 0.9rem 1.25rem;
+      padding: 1rem 1.25rem;
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--text2);
-      font-size: 0.82rem;
-      font-weight: 500;
-      font-family: var(--font);
+      color: var(--text);
+      font-size: 0.875rem;
+      font-weight: 600;
       text-align: left;
+      transition: background 0.1s;
       border-radius: 0;
       min-height: 0;
-      transition: background 0.1s;
     }
-    .labels-trigger:hover { background: var(--surface2); color: var(--text); }
+    .labels-trigger:hover { background: var(--muted); }
 
     .labels-trigger-left {
       display: flex;
       align-items: center;
-      gap: 0.55rem;
+      gap: 0.6rem;
     }
+    .labels-trigger-left svg { color: var(--accent); }
 
     .labels-badge {
       display: inline-flex;
@@ -264,16 +215,15 @@
       justify-content: center;
       background: var(--accent);
       color: #fff;
-      font-size: 0.62rem;
-      font-weight: 600;
+      font-size: 0.68rem;
+      font-weight: 700;
       border-radius: 99px;
-      min-width: 17px;
-      height: 17px;
-      padding: 0 4px;
-      font-family: var(--mono);
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
     }
 
-    .chevron { transition: transform 0.2s ease; color: var(--text3); flex-shrink: 0; }
+    .chevron { transition: transform 0.2s ease; color: #bbb; flex-shrink: 0; }
     .labels-trigger[aria-expanded="true"] .chevron { transform: rotate(180deg); }
 
     .labels-body {
@@ -286,21 +236,21 @@
     .label-chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.35rem;
+      gap: 0.4rem;
       margin-bottom: 0.85rem;
-      padding-top: 0.9rem;
+      padding-top: 0.85rem;
     }
 
     .chip {
       display: inline-flex;
       align-items: center;
-      gap: 0.25rem;
-      padding: 0.28rem 0.5rem 0.28rem 0.65rem;
-      background: var(--surface2);
+      gap: 0.3rem;
+      padding: 0.3rem 0.55rem 0.3rem 0.7rem;
+      background: var(--muted);
       border-radius: 99px;
-      font-size: 0.78rem;
-      color: var(--text2);
-      border: 1px solid var(--border2);
+      font-size: 0.8rem;
+      color: #444;
+      border: 1px solid var(--border);
     }
 
     .chip-delete {
@@ -310,9 +260,9 @@
       background: none;
       border: none;
       cursor: pointer;
-      color: var(--text3);
+      color: #ccc;
       padding: 0;
-      font-size: 0.85rem;
+      font-size: 0.9rem;
       line-height: 1;
       width: auto;
       margin: 0;
@@ -325,141 +275,96 @@
     .add-label-row input { flex: 1; margin-bottom: 0; }
 
     /* ── HISTORY ── */
-    .history-filter {
+    .history-controls {
       display: flex;
-      gap: 0.4rem;
+      gap: 0.5rem;
       align-items: flex-end;
       margin-bottom: 1rem;
     }
-    .history-filter .field { flex: 1; margin-bottom: 0; }
+    .history-controls .field { flex: 1; margin-bottom: 0; }
 
-    .event-list { display: flex; flex-direction: column; gap: 0.4rem; }
+    .event-list { display: flex; flex-direction: column; gap: 0.5rem; }
 
-    /* Mobile-first event row: stacked layout */
     .event-row {
-      display: grid;
-      grid-template-areas:
-        "dot info  actions"
-        "dot time  duration";
-      grid-template-columns: auto 1fr auto;
-      grid-template-rows: auto auto;
-      column-gap: 0.6rem;
-      row-gap: 0.1rem;
-      padding: 0.7rem 0.85rem;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border);
+      display: flex;
       align-items: center;
+      gap: 0.6rem;
+      padding: 0.6rem 0.75rem;
+      background: var(--muted);
+      border-radius: 9px;
+      border: 1px solid var(--border);
     }
 
     .event-dot {
-      grid-area: dot;
-      width: 7px;
-      height: 7px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       flex-shrink: 0;
       background: var(--accent);
-      align-self: start;
-      margin-top: 5px;
     }
 
-    .event-label-text {
-      grid-area: info;
+    .event-info { flex: 1; min-width: 0; }
+
+    .event-label {
       font-size: 0.875rem;
       font-weight: 600;
       color: var(--text);
-      letter-spacing: -0.01em;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
 
     .event-time {
-      grid-area: time;
-      font-size: 0.72rem;
-      color: var(--text2);
-      font-family: var(--mono);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      font-size: 0.75rem;
+      color: var(--subtext);
+      margin-top: 0.1rem;
     }
 
     .event-duration {
-      grid-area: duration;
-      font-size: 0.72rem;
-      font-family: var(--mono);
-      font-weight: 500;
-      color: var(--text3);
-      text-align: right;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--subtext);
       white-space: nowrap;
     }
 
-    .event-actions {
-      grid-area: actions;
-      display: flex;
-      gap: 0.3rem;
-      flex-shrink: 0;
-    }
+    .event-actions { display: flex; gap: 0.35rem; flex-shrink: 0; }
 
     .icon-btn {
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       border-radius: 7px;
-      border: 1px solid var(--border2);
-      background: var(--surface);
+      border: 1px solid var(--border);
+      background: var(--card);
       cursor: pointer;
-      color: var(--text3);
-      font-size: 0.78rem;
+      color: var(--subtext);
+      font-size: 0.8rem;
       min-height: 0;
       padding: 0;
       transition: all 0.15s;
-      flex-shrink: 0;
     }
-    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
-    .icon-btn.danger:hover { border-color: var(--error); color: var(--error); background: rgba(248,113,113,0.08); }
+    .icon-btn:hover { border-color: var(--accent); color: var(--accent); background: #eef; }
+    .icon-btn.danger:hover { border-color: var(--error); color: var(--error); background: #fff0f0; }
 
-    /* Edit form — full width, clearly separated */
+    /* Edit form inside event row */
     .event-edit-form {
       display: flex;
       flex-direction: column;
-      gap: 0.75rem;
-      padding: 1rem;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
-      border: 1px solid var(--border2);
-    }
-
-    .event-edit-form .edit-label {
-      font-size: 0.6rem;
-      font-weight: 500;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--text3);
-      margin-bottom: 0.75rem;
-    }
-
-    .event-edit-form .field { margin-bottom: 0; }
-
-    .event-edit-form .two-col {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
       gap: 0.5rem;
+      padding: 0.75rem;
+      background: var(--muted);
+      border-radius: 9px;
+      border: 1px solid var(--border);
     }
 
-    .event-edit-actions {
-      display: flex;
-      gap: 0.5rem;
-      padding-top: 0.25rem;
-    }
+    .event-edit-form .row { display: flex; gap: 0.5rem; }
+    .event-edit-form .field { flex: 1; margin-bottom: 0; }
+    .event-edit-actions { display: flex; gap: 0.5rem; }
 
     /* ── STATS ── */
     .tabs {
       display: flex;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
+      background: var(--muted);
+      border-radius: 9px;
       padding: 3px;
       gap: 3px;
       margin-bottom: 1.1rem;
@@ -467,67 +372,59 @@
 
     .tab {
       flex: 1;
-      padding: 0.42rem 0;
+      padding: 0.45rem 0;
       border: none;
       border-radius: 7px;
       background: transparent;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 500;
-      font-family: var(--font);
       cursor: pointer;
-      color: var(--text3);
+      color: #999;
       transition: all 0.15s;
       min-height: 0;
       width: auto;
     }
     .tab.active {
-      background: var(--surface);
+      background: var(--card);
       color: var(--text);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.1);
     }
 
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
     .stats-summary {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: var(--muted);
+      border-radius: 10px;
       margin-bottom: 1.1rem;
-    }
-
-    .stat-summary-cell {
-      padding: 0.75rem 0.9rem;
-      background: var(--surface2);
-      border-radius: var(--radius-sm);
       border: 1px solid var(--border);
     }
-    .stat-summary-label { font-size: 0.62rem; color: var(--text3); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.3rem; }
-    .stat-summary-value { font-size: 1.05rem; font-weight: 600; letter-spacing: -0.02em; font-family: var(--mono); }
+    .stats-summary-label { font-size: 0.72rem; color: var(--subtext); font-weight: 500; text-transform: uppercase; letter-spacing: 0.07em; }
+    .stats-summary-value { font-size: 1rem; font-weight: 700; letter-spacing: -0.3px; }
 
     .pie-wrap { display: flex; justify-content: center; margin-bottom: 1.25rem; }
     .pie-wrap svg { overflow: visible; }
 
-    .stat-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.85rem; }
-    .stat-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.85rem; gap: 0.5rem; }
-    .stat-label-wrap { display: flex; align-items: center; gap: 0.4rem; min-width: 0; }
-    .stat-label { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .stat-meta { color: var(--text3); font-size: 0.74rem; font-family: var(--mono); white-space: nowrap; flex-shrink: 0; }
-    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .stat-row { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.9rem; }
+    .stat-header { display: flex; justify-content: space-between; align-items: baseline; font-size: 0.875rem; }
+    .stat-label { font-weight: 500; }
+    .stat-meta { color: #aaa; font-size: 0.78rem; }
+    .stat-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; margin-top: 2px; }
 
-    .bar-wrap { background: var(--surface2); border-radius: 4px; height: 4px; width: 100%; overflow: hidden; }
-    .bar { height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.16,1,0.3,1); }
+    .bar-wrap { background: var(--muted); border-radius: 4px; height: 5px; width: 100%; overflow: hidden; }
+    .bar { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
 
     /* ── FORM ELEMENTS ── */
-    .field { margin-bottom: 0.8rem; }
+    .field { margin-bottom: 0.85rem; }
 
     label {
       display: block;
-      font-size: 0.62rem;
+      font-size: 0.72rem;
       font-weight: 500;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--text3);
+      color: var(--subtext);
       margin-bottom: 0.35rem;
     }
 
@@ -538,11 +435,10 @@
     input[type="datetime-local"] {
       width: 100%;
       padding: 0.6rem 0.75rem;
-      border: 1px solid var(--border2);
-      border-radius: var(--radius-sm);
-      font-size: max(16px, 0.875rem);
-      font-family: var(--font);
-      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: 9px;
+      font-size: max(16px, 0.9rem);
+      background: var(--muted);
       color: var(--text);
       outline: none;
       transition: border-color 0.15s, background 0.15s;
@@ -552,55 +448,59 @@
 
     select {
       cursor: pointer;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235a5754' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23aaa' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
       background-repeat: no-repeat;
       background-position: right 0.75rem center;
+      background-color: var(--muted);
       padding-right: 2.25rem;
     }
 
     select:focus, input:focus {
       border-color: var(--accent);
+      background: var(--card);
       outline: none;
-      box-shadow: 0 0 0 3px rgba(232,93,58,0.15);
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.12);
     }
 
-    /* ── BUTTONS ── */
+    .row { display: flex; gap: 0.6rem; }
+    .row .field { flex: 1; }
+
     button {
       display: inline-flex;
       align-items: center;
       justify-content: center;
       padding: 0.62rem 1.1rem;
       border: none;
-      border-radius: var(--radius-sm);
+      border-radius: 9px;
       background: var(--accent);
       color: #fff;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      font-family: var(--font);
       cursor: pointer;
-      transition: background 0.15s, transform 0.1s, opacity 0.15s;
+      transition: background 0.15s, transform 0.1s;
       white-space: nowrap;
-      min-height: 42px;
+      min-height: 44px;
       -webkit-tap-highlight-color: transparent;
-      letter-spacing: -0.01em;
     }
 
     button.full { width: 100%; }
-    button:active { transform: scale(0.97); }
+    button:active { transform: scale(0.98); }
     button:hover { background: var(--accent-dark); }
 
     button.secondary {
-      background: var(--surface2);
-      color: var(--text2);
-      border: 1px solid var(--border2);
-      font-size: 0.8rem;
-      min-height: 36px;
-      padding: 0.38rem 0.85rem;
+      background: var(--muted);
+      color: #444;
+      border: 1.5px solid var(--border);
+      font-size: 0.82rem;
+      min-height: 38px;
+      padding: 0.4rem 0.85rem;
     }
-    button.secondary:hover { background: var(--border2); color: var(--text); }
+    button.secondary:hover { background: var(--border); color: var(--text); }
 
-    button.danger { background: var(--error); }
-    button.danger:hover { background: #e05050; }
+    button.danger {
+      background: var(--error);
+    }
+    button.danger:hover { background: #b91c1c; }
 
     button.sm {
       font-size: 0.8rem;
@@ -608,21 +508,17 @@
       padding: 0.35rem 0.85rem;
     }
 
-    /* ── MISC ── */
     .status {
-      margin-top: 0.6rem;
-      font-size: 0.78rem;
+      margin-top: 0.65rem;
+      font-size: 0.8rem;
       min-height: 1.1rem;
       color: var(--success);
     }
     .status.error { color: var(--error); }
 
-    .empty { font-size: 0.8rem; color: var(--text3); font-style: italic; text-align: center; padding: 0.75rem 0; }
+    .empty { font-size: 0.82rem; color: #bbb; font-style: italic; text-align: center; padding: 0.5rem 0; }
 
     hr { border: none; border-top: 1px solid var(--border); margin: 0.9rem 0; }
-
-    .row { display: flex; gap: 0.5rem; }
-    .row .field { flex: 1; }
   </style>
 </head>
 <body>
@@ -630,8 +526,7 @@
 <!-- LOGIN -->
 <div id="login-overlay">
   <div class="login-card">
-    <div class="wordmark">Life Logger</div>
-    <h2>Welcome back, Jacob.</h2>
+    <h2>Jacob's Life Logger</h2>
     <div class="field">
       <label>Username</label>
       <input type="text" id="login-user" autocomplete="username" />
@@ -640,7 +535,7 @@
       <label>Password</label>
       <input type="password" id="login-pass" autocomplete="current-password" />
     </div>
-    <button class="full" onclick="login()" style="margin-top:0.5rem">Sign in</button>
+    <button class="full" onclick="login()" style="margin-top:0.5rem">Log in</button>
     <div class="status error" id="login-status"></div>
   </div>
 </div>
@@ -649,35 +544,31 @@
 <div id="app">
 
   <div class="app-header">
-    <div class="app-header-left">
-      <div class="wordmark">Life Logger</div>
-      <h1>Jacob's Log</h1>
-    </div>
-    <button class="secondary sm" onclick="logout()">Log out</button>
+    <h1>Jacob's Life Logger</h1>
+    <button class="secondary" onclick="logout()">Log out</button>
   </div>
 
   <!-- TIMER CARD -->
   <div class="card">
-    <div class="timer-body">
-      <div class="timer-top">
-        <div class="timer-meta">
-          <div class="timer-state" id="timer-label">No active event</div>
-          <div class="timer-activity inactive" id="timer-activity">Idle</div>
-          <div class="timer-since" id="timer-since"></div>
-        </div>
-        <div class="timer-elapsed-wrap">
-          <div class="timer-elapsed inactive" id="timer-elapsed">0:00:00</div>
-        </div>
+    <div class="card-inner">
+      <div class="section-title">Now</div>
+
+      <div class="timer-display">
+        <div class="timer-label" id="timer-label">No active event</div>
+        <div class="timer-activity inactive" id="timer-activity">—</div>
+        <div class="timer-elapsed inactive" id="timer-elapsed">0:00:00</div>
+        <div class="timer-since" id="timer-since"></div>
       </div>
 
       <div class="label-grid" id="label-grid"></div>
 
-      <div class="timer-footer">
-        <div class="status error" style="flex:1;margin:0" id="timer-status"></div>
-        <button class="sm secondary" id="stop-btn" onclick="stopEvent()" style="display:none">
+      <div class="timer-stop-row">
+        <button class="secondary sm" id="stop-btn" onclick="stopEvent()" style="display:none">
           Stop
         </button>
       </div>
+
+      <div class="status error" id="timer-status"></div>
     </div>
   </div>
 
@@ -685,14 +576,14 @@
   <div class="card">
     <button class="labels-trigger" aria-expanded="false" aria-controls="labels-body" onclick="toggleLabels(this)">
       <span class="labels-trigger-left">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/>
           <line x1="7" y1="7" x2="7.01" y2="7"/>
         </svg>
         Labels
         <span class="labels-badge" id="labels-count">0</span>
       </span>
-      <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+      <svg class="chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
         <path d="M6 9l6 6 6-6"/>
       </svg>
     </button>
@@ -710,19 +601,18 @@
   <div class="card">
     <div class="card-inner">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem;">
-        <div class="section-label" style="margin-bottom:0">History</div>
+        <div class="section-title" style="margin-bottom:0">History</div>
         <button class="sm secondary" onclick="toggleAddForm()">+ Add entry</button>
       </div>
 
-      <!-- Manual add form -->
+      <!-- Manual add form (hidden by default) -->
       <div id="add-form" style="display:none;margin-bottom:1rem;">
         <div class="event-edit-form">
-          <div class="section-label" style="margin:0 0 0.6rem">New Entry</div>
-          <div class="field" style="margin-bottom:0.5rem">
+          <div class="field" style="margin-bottom:0">
             <label>Label</label>
             <select id="add-label"></select>
           </div>
-          <div class="two-col">
+          <div class="row">
             <div class="field">
               <label>Start</label>
               <input type="datetime-local" id="add-start" />
@@ -740,13 +630,13 @@
         </div>
       </div>
 
-      <div class="history-filter">
+      <div class="history-controls">
         <div class="field">
-          <label>From</label>
+          <label>Start</label>
           <input type="date" id="hist-start" />
         </div>
         <div class="field">
-          <label>To</label>
+          <label>End</label>
           <input type="date" id="hist-end" />
         </div>
         <button class="sm" onclick="loadHistory()" style="margin-bottom:0;flex-shrink:0">Query</button>
@@ -758,7 +648,7 @@
   <!-- STATISTICS CARD -->
   <div class="card">
     <div class="card-inner">
-      <div class="section-label">Statistics</div>
+      <div class="section-title">Statistics</div>
       <div class="tabs">
         <button class="tab active" onclick="switchTab('stats', 'single', this)">Single Date</button>
         <button class="tab" onclick="switchTab('stats', 'range', this)">Date Range</button>
@@ -775,11 +665,11 @@
       <div id="stats-range" class="tab-panel">
         <div class="row">
           <div class="field">
-            <label>From</label>
+            <label>Start</label>
             <input type="date" id="stats-r-start" />
           </div>
           <div class="field">
-            <label>To</label>
+            <label>End</label>
             <input type="date" id="stats-r-end" />
           </div>
         </div>
@@ -855,6 +745,7 @@
   async function initApp() {
     const today = new Date().toISOString().slice(0, 10);
     document.querySelectorAll("input[type='date']").forEach(el => el.value = today);
+
     await Promise.all([loadLabels(), loadActiveEvent()]);
   }
 
@@ -948,7 +839,7 @@
     const stopBtn = document.getElementById("stop-btn");
 
     if (!activeEvent) {
-      activityEl.textContent = "Idle";
+      activityEl.textContent = "—";
       activityEl.className = "timer-activity inactive";
       elapsedEl.textContent = "0:00:00";
       elapsedEl.className = "timer-elapsed inactive";
@@ -967,7 +858,7 @@
     activityEl.className = "timer-activity";
     elapsedEl.textContent = `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
     elapsedEl.className = "timer-elapsed";
-    labelEl.textContent = "Tracking";
+    labelEl.textContent = "Currently tracking";
     sinceEl.textContent = `Since ${fmtLocalTime(activeEvent.started_at)}`;
     stopBtn.style.display = "";
   }
@@ -1029,13 +920,15 @@
            data-start="${ev.started_at}"
            data-end="${ev.ended_at || ''}">
         <div class="event-dot"></div>
-        <div class="event-label-text">${ev.label}</div>
+        <div class="event-info">
+          <div class="event-label">${ev.label}</div>
+          <div class="event-time">${fmtLocalTime(ev.started_at)} → ${ev.ended_at ? fmtLocalTime(ev.ended_at) : "<em>active</em>"}</div>
+        </div>
+        <div class="event-duration">${ev.ended_at ? fmtDuration(ev.started_at, ev.ended_at) : "—"}</div>
         <div class="event-actions">
           <button class="icon-btn" onclick="showEditForm(${ev.id})" title="Edit">✎</button>
           <button class="icon-btn danger" onclick="deleteHistEvent(${ev.id})" title="Delete">✕</button>
         </div>
-        <div class="event-time">${fmtLocalTime(ev.started_at)} → ${ev.ended_at ? fmtLocalTime(ev.ended_at) : "<em>active</em>"}</div>
-        <div class="event-duration">${ev.ended_at ? fmtDuration(ev.started_at, ev.ended_at) : "—"}</div>
       </div>`).join("")}</div>`;
   }
 
@@ -1045,12 +938,11 @@
     const opts = labels.map(l => `<option value="${l}" ${l === evLabel ? "selected" : ""}>${l}</option>`).join("");
     row.outerHTML = `
       <div class="event-edit-form" id="ev-${id}">
-        <div class="section-label" style="margin:0 0 0.5rem">Edit Entry</div>
-        <div class="field">
+        <div class="field" style="margin-bottom:0">
           <label>Label</label>
           <select id="edit-label-${id}">${opts}</select>
         </div>
-        <div class="two-col">
+        <div class="row">
           <div class="field">
             <label>Start</label>
             <input type="datetime-local" id="edit-start-${id}" value="${utcToLocalInput(evStart)}" />
@@ -1098,6 +990,7 @@
     const visible = form.style.display !== "none";
     form.style.display = visible ? "none" : "block";
     if (!visible) {
+      // pre-fill with current local datetime
       const now = utcToLocalInput(new Date().toISOString());
       document.getElementById("add-start").value = now;
       document.getElementById("add-end").value = now;
@@ -1163,7 +1056,7 @@
     } catch(e) { status.textContent = e.message; }
   }
 
-  const PALETTE = ["#e85d3a","#f59e0b","#4ade80","#60a5fa","#a78bfa","#f472b6","#34d399","#fb923c","#38bdf8","#a3e635"];
+  const PALETTE = ["#6366f1","#f59e0b","#10b981","#ef4444","#3b82f6","#a855f7","#f97316","#14b8a6","#ec4899","#84cc16"];
 
   function renderStats(percentages, minutes) {
     const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
@@ -1176,49 +1069,49 @@
 
     const summary = `
       <div class="stats-summary">
-        <div class="stat-summary-cell">
-          <div class="stat-summary-label">Total tracked</div>
-          <div class="stat-summary-value">${fmtMins(totalMins)}</div>
+        <div>
+          <div class="stats-summary-label">Total tracked</div>
+          <div class="stats-summary-value">${fmtMins(totalMins)}</div>
         </div>
-        <div class="stat-summary-cell">
-          <div class="stat-summary-label">Activities</div>
-          <div class="stat-summary-value">${sorted.length}</div>
+        <div style="text-align:right">
+          <div class="stats-summary-label">Activities</div>
+          <div class="stats-summary-value">${sorted.length}</div>
         </div>
       </div>`;
 
-    const pie = `<div class="pie-wrap" style="margin-top:0.5rem">${buildPie(slices)}</div>`;
+    const pie = `<div class="pie-wrap">${buildPie(slices)}</div>`;
 
     const rows = sorted.map(([label, pct]) => `
       <div class="stat-row">
         <div class="stat-header">
-          <span class="stat-label-wrap">
+          <span style="display:flex;align-items:center;gap:0.45rem">
             <span class="stat-dot" style="background:${colorMap[label]}"></span>
             <span class="stat-label">${label}</span>
           </span>
-          <span class="stat-meta">${fmtMins(minutes[label])} · ${pct}%</span>
+          <span class="stat-meta">${fmtMins(minutes[label])} &nbsp;·&nbsp; ${pct}%</span>
         </div>
         <div class="bar-wrap"><div class="bar" style="width:${pct}%;background:${colorMap[label]}"></div></div>
       </div>`).join("");
 
-    document.getElementById("stats-result").innerHTML = `<div style="margin-top:1.1rem">${summary}${pie}${rows}</div>`;
+    document.getElementById("stats-result").innerHTML = summary + pie + rows;
   }
 
   function buildPie(slices) {
-    const R = 68, CX = 88, CY = 88, C = 2 * Math.PI * R;
+    const R = 72, CX = 90, CY = 90, C = 2 * Math.PI * R;
     let paths = "", offset = 0;
     if (slices.length === 1) {
       paths = `<circle cx="${CX}" cy="${CY}" r="${R}" fill="${slices[0].color}" />`;
     } else {
       for (const { pct, color } of slices) {
         const dash = (pct / 100) * C;
-        paths += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${color}" stroke-width="32"
+        paths += `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="${color}" stroke-width="36"
           stroke-dasharray="${dash} ${C - dash}" stroke-dashoffset="${-offset}"
           transform="rotate(-90 ${CX} ${CY})" />`;
         offset += dash;
       }
     }
-    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 16}" fill="#27272d" />`;
-    return `<svg width="176" height="176" viewBox="0 0 176 176">${paths}</svg>`;
+    paths += `<circle cx="${CX}" cy="${CY}" r="${R - 18}" fill="white" />`;
+    return `<svg width="180" height="180" viewBox="0 0 180 180">${paths}</svg>`;
   }
 
   // ── UTILS ──
@@ -1231,6 +1124,7 @@
   }
 
   function utcToLocalInput(utcStr) {
+    // Returns "YYYY-MM-DDTHH:MM" for datetime-local input
     const d = new Date(utcStr);
     const pad = n => String(n).padStart(2, "0");
     return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
