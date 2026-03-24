@@ -8,6 +8,7 @@ PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 DB_PATH = str(PROJECT_ROOT / "timelogger.db")
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
+DIST_DIR = PROJECT_ROOT / "frontend-dist"
 
 SESSION_TIMEOUT = timedelta(hours=1)
 SESSION_TOUCH_INTERVAL = timedelta(minutes=5)
