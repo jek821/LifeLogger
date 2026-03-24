@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Jacob's Life Logger</title>
+  <title>Life Logger</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet">
@@ -97,6 +97,15 @@
       color: var(--text);
       margin-bottom: 1.75rem;
     }
+
+    .auth-switch {
+      margin-top: 1rem;
+      font-size: 0.8rem;
+      color: var(--text2);
+      text-align: center;
+    }
+    .auth-switch a { color: var(--accent); text-decoration: none; }
+    .auth-switch a:hover { text-decoration: underline; }
 
     /* ── APP SHELL ── */
     #app {
@@ -612,6 +621,69 @@
 
     .row { display: flex; gap: 0.5rem; }
     .row .field { flex: 1; }
+
+    /* ── DEVELOPER ── */
+    .dev-inner { padding: 1.25rem; display: flex; flex-direction: column; gap: 1.1rem; }
+
+    .dev-intro { font-size: 0.82rem; color: var(--text2); line-height: 1.55; }
+
+    .dev-token-box {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+    }
+    .dev-token-label { font-size: 0.72rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text3); flex-shrink: 0; }
+    .dev-token-value { font-family: var(--mono); font-size: 0.72rem; color: var(--text2); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dev-token-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+    .dev-block { display: flex; flex-direction: column; gap: 0.5rem; }
+    .dev-block-label { font-size: 0.65rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text3); }
+
+    pre.dev-code {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 0.75rem 1rem;
+      margin: 0;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      line-height: 1.6;
+      color: var(--text2);
+      white-space: pre;
+    }
+    pre.dev-code .hl { color: var(--accent); }
+
+    .dev-endpoints { display: flex; flex-direction: column; gap: 0.85rem; }
+
+    .dev-endpoint-row { display: flex; flex-direction: column; gap: 0.3rem; }
+    .dev-endpoint-title { font-size: 0.75rem; color: var(--text); font-weight: 500; }
+    .dev-endpoint-desc { font-size: 0.75rem; color: var(--text2); }
+
+    .dev-gh-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.82rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .dev-gh-link:hover { text-decoration: underline; }
+    .dev-notice {
+      font-size: 0.75rem;
+      color: var(--text3);
+      line-height: 1.5;
+      padding: 0.6rem 0.85rem;
+      background: var(--surface2);
+      border-left: 2px solid var(--accent);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
   </style>
 </head>
 <body>
@@ -620,16 +692,41 @@
 <div id="login-overlay">
   <div class="login-card">
     <div class="wordmark">Life Logger</div>
-    <h2>Welcome back, Jacob.</h2>
-    <div class="field">
-      <label>Username</label>
-      <input type="text" id="login-user" autocomplete="username" />
+
+    <!-- Sign-in panel -->
+    <div id="login-panel">
+      <h2>Welcome back.</h2>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="login-user" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-pass" autocomplete="current-password" />
+      </div>
+      <button class="full" onclick="login()" style="margin-top:0.5rem">Sign in</button>
+      <p class="auth-switch">New here? <a href="#" onclick="showRegisterPanel(); return false;">Create an account</a></p>
     </div>
-    <div class="field">
-      <label>Password</label>
-      <input type="password" id="login-pass" autocomplete="current-password" />
+
+    <!-- Register panel -->
+    <div id="register-panel" style="display:none">
+      <h2>Create account.</h2>
+      <div class="field">
+        <label>Your name</label>
+        <input type="text" id="reg-name" placeholder="e.g. Jacob" autocomplete="name" />
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="reg-user" autocomplete="username" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="reg-pass" autocomplete="new-password" />
+      </div>
+      <button class="full" onclick="register()" style="margin-top:0.5rem">Create account</button>
+      <p class="auth-switch">Already have an account? <a href="#" onclick="showLoginPanel(); return false;">Sign in</a></p>
     </div>
-    <button class="full" onclick="login()" style="margin-top:0.5rem">Sign in</button>
+
     <div class="status error" id="login-status"></div>
   </div>
 </div>
@@ -640,7 +737,7 @@
   <div class="app-header">
     <div class="app-header-left">
       <div class="wordmark">Life Logger</div>
-      <h1>Jacob's Log</h1>
+      <h1 id="user-name-display">My Log</h1>
     </div>
     <div class="header-actions">
       <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn" title="Toggle theme">🌙</button>
@@ -807,6 +904,107 @@
     </div>
   </div>
 
+  <!-- DEVELOPER ACCORDION -->
+  <div class="card">
+    <button class="accordion-trigger" aria-expanded="false" onclick="toggleAccordion(this, 'dev-body')">
+      <span class="accordion-trigger-left">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/>
+        </svg>
+        Developer
+      </span>
+      <svg class="chevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 9l6 6 6-6"/>
+      </svg>
+    </button>
+    <div class="accordion-body" id="dev-body">
+      <div class="dev-inner">
+
+        <p class="dev-intro">Query your own data with any HTTP client — curl, Python, JavaScript, or anything else. All endpoints require your Bearer token. Your data is fully isolated; tokens only grant access to your own account.</p>
+
+        <div class="dev-notice">No additional setup required. The existing auth is sufficient for external API access. Use HTTPS in production so tokens are not transmitted in plaintext.</div>
+
+        <div class="dev-block">
+          <div class="dev-block-label">Your session token</div>
+          <div class="dev-token-box">
+            <span class="dev-token-label">Token</span>
+            <span class="dev-token-value" id="dev-token-display">—</span>
+            <div class="dev-token-actions">
+              <button class="sm secondary" onclick="devRevealToken()" id="dev-reveal-btn">Reveal</button>
+              <button class="sm secondary" onclick="devCopyToken()">Copy</button>
+            </div>
+          </div>
+          <p class="dev-intro" style="margin-top:0.25rem">Sessions expire after 1 hour of inactivity. Log out and back in to get a fresh token.</p>
+        </div>
+
+        <div class="dev-block">
+          <div class="dev-block-label">Base URL</div>
+          <pre class="dev-code" id="dev-base-url"></pre>
+        </div>
+
+        <div class="dev-block">
+          <div class="dev-block-label">Authentication header</div>
+          <pre class="dev-code">Authorization: Bearer &lt;your-token&gt;</pre>
+        </div>
+
+        <hr />
+
+        <div class="dev-block">
+          <div class="dev-block-label">Endpoints</div>
+          <div class="dev-endpoints">
+
+            <div class="dev-endpoint-row">
+              <span class="dev-endpoint-title">Profile</span>
+              <pre class="dev-code">curl <span class="hl" id="dev-ex-me"></span> \
+  -H "Authorization: Bearer &lt;token&gt;"</pre>
+            </div>
+
+            <div class="dev-endpoint-row">
+              <span class="dev-endpoint-title">Labels</span>
+              <pre class="dev-code">curl <span class="hl" id="dev-ex-labels"></span> \
+  -H "Authorization: Bearer &lt;token&gt;"</pre>
+            </div>
+
+            <div class="dev-endpoint-row">
+              <span class="dev-endpoint-title">Events for a date range</span>
+              <span class="dev-endpoint-desc">Timestamps are UTC ISO 8601. The frontend converts local dates for you — for scripts, construct the UTC range manually.</span>
+              <pre class="dev-code">curl "<span class="hl" id="dev-ex-events"></span>" \
+  -H "Authorization: Bearer &lt;token&gt;"</pre>
+            </div>
+
+            <div class="dev-endpoint-row">
+              <span class="dev-endpoint-title">Statistics for a date range</span>
+              <span class="dev-endpoint-desc">Returns percentages and total minutes per label.</span>
+              <pre class="dev-code">curl "<span class="hl" id="dev-ex-stats"></span>" \
+  -H "Authorization: Bearer &lt;token&gt;"</pre>
+            </div>
+
+          </div>
+        </div>
+
+        <div class="dev-block">
+          <div class="dev-block-label">Full API reference</div>
+          <p class="dev-intro">FastAPI generates interactive docs automatically. You can authenticate and try every endpoint directly in the browser.</p>
+          <pre class="dev-code" id="dev-ex-docs"></pre>
+        </div>
+
+        <hr />
+
+        <div class="dev-block">
+          <div class="dev-block-label">Contribute</div>
+          <p class="dev-intro">Life Logger is open source. Bug reports, feature requests, and pull requests are all welcome.</p>
+          <a class="dev-gh-link" href="https://github.com/jek821/LifeLogger" target="_blank" rel="noopener">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
+            </svg>
+            github.com/jek821/LifeLogger
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
 </div><!-- #app -->
 
 <script>
@@ -835,11 +1033,27 @@
   function getToken() { return localStorage.getItem("tl_token"); }
   function setToken(t) { localStorage.setItem("tl_token", t); }
   function clearToken() { localStorage.removeItem("tl_token"); }
+  function getName() { return localStorage.getItem("tl_name") || ""; }
+  function setName(n) { localStorage.setItem("tl_name", n); }
+  function clearName() { localStorage.removeItem("tl_name"); }
   function authHeaders() {
     return { "Content-Type": "application/json", "Authorization": `Bearer ${getToken()}` };
   }
 
+  function showLoginPanel() {
+    document.getElementById("register-panel").style.display = "none";
+    document.getElementById("login-panel").style.display = "";
+    document.getElementById("login-status").textContent = "";
+  }
+
+  function showRegisterPanel() {
+    document.getElementById("login-panel").style.display = "none";
+    document.getElementById("register-panel").style.display = "";
+    document.getElementById("login-status").textContent = "";
+  }
+
   function showLogin(msg) {
+    showLoginPanel();
     document.getElementById("login-overlay").classList.remove("hidden");
     document.getElementById("app").style.display = "none";
     stopTimerTick();
@@ -849,6 +1063,10 @@
   function showApp() {
     document.getElementById("login-overlay").classList.add("hidden");
     document.getElementById("app").style.display = "flex";
+    const name = getName();
+    document.getElementById("user-name-display").textContent = name ? `${name}'s Log` : "My Log";
+    document.title = name ? `${name}'s Life Logger` : "Life Logger";
+    initDevPanel();
     initApp();
   }
 
@@ -864,8 +1082,31 @@
         body: JSON.stringify({ username, password }),
       });
       if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
-      setToken((await res.json()).token);
+      const data = await res.json();
+      setToken(data.token);
+      setName(data.display_name);
       document.getElementById("login-pass").value = "";
+      showApp();
+    } catch(e) { status.textContent = e.message; }
+  }
+
+  async function register() {
+    const display_name = document.getElementById("reg-name").value.trim();
+    const username = document.getElementById("reg-user").value.trim();
+    const password = document.getElementById("reg-pass").value;
+    const status = document.getElementById("login-status");
+    status.textContent = "";
+    try {
+      const res = await fetch(`${API}/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, display_name, password }),
+      });
+      if (!res.ok) { const e = await res.json(); throw new Error(e.detail); }
+      const data = await res.json();
+      setToken(data.token);
+      setName(data.display_name);
+      document.getElementById("reg-pass").value = "";
       showApp();
     } catch(e) { status.textContent = e.message; }
   }
@@ -873,18 +1114,20 @@
   async function logout() {
     await fetch(`${API}/logout`, { method: "POST", headers: authHeaders() }).catch(() => {});
     clearToken();
+    clearName();
     showLogin();
   }
 
   async function apiFetch(url, opts = {}) {
     if (!opts.headers) opts.headers = authHeaders();
     const res = await fetch(url, opts);
-    if (res.status === 401) { clearToken(); showLogin("Session expired. Please log in again."); throw new Error("Unauthorized"); }
+    if (res.status === 401) { clearToken(); clearName(); showLogin("Session expired. Please log in again."); throw new Error("Unauthorized"); }
     return res;
   }
 
   document.getElementById("login-user").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
   document.getElementById("login-pass").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+  document.getElementById("reg-pass").addEventListener("keydown", e => { if (e.key === "Enter") register(); });
 
   // ── INIT ──
   async function initApp() {
@@ -1280,11 +1523,51 @@
     return `${s}s`;
   }
 
+  // ── DEVELOPER PANEL ──
+  let devTokenRevealed = false;
+
+  function initDevPanel() {
+    const base = window.location.origin;
+    document.getElementById("dev-base-url").textContent = base;
+    document.getElementById("dev-ex-docs").textContent = base + "/docs";
+    document.getElementById("dev-ex-me").textContent = base + "/me";
+    document.getElementById("dev-ex-labels").textContent = base + "/labels";
+    const exStart = "2026-03-01T00:00:00Z";
+    const exEnd   = "2026-04-01T00:00:00Z";
+    document.getElementById("dev-ex-events").textContent = `${base}/events?start=${exStart}&end=${exEnd}`;
+    document.getElementById("dev-ex-stats").textContent  = `${base}/stats?start=${exStart}&end=${exEnd}`;
+    devTokenRevealed = false;
+    document.getElementById("dev-reveal-btn").textContent = "Reveal";
+    document.getElementById("dev-token-display").textContent = "••••••••••••••••";
+  }
+
+  function devRevealToken() {
+    devTokenRevealed = !devTokenRevealed;
+    const t = getToken() || "(no active session)";
+    document.getElementById("dev-token-display").textContent = devTokenRevealed ? t : "••••••••••••••••";
+    document.getElementById("dev-reveal-btn").textContent = devTokenRevealed ? "Hide" : "Reveal";
+  }
+
+  function devCopyToken() {
+    const t = getToken();
+    if (!t) return;
+    navigator.clipboard.writeText(t).then(() => {
+      const btn = event.target;
+      btn.textContent = "Copied!";
+      setTimeout(() => { btn.textContent = "Copy"; }, 1500);
+    });
+  }
+
   // ── BOOT ──
   applyTheme(localStorage.getItem('tl_theme') || 'dark');
 
   if (getToken()) {
-    apiFetch(`${API}/labels`).then(res => { if (res.ok) showApp(); }).catch(() => showLogin());
+    apiFetch(`${API}/me`)
+      .then(async res => {
+        if (res.ok) { const u = await res.json(); setName(u.display_name); showApp(); }
+        else showLogin();
+      })
+      .catch(() => showLogin());
   } else {
     showLogin();
   }

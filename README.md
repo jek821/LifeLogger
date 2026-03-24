@@ -1,6 +1,8 @@
-# Jacob's Life Logger
+# Life Logger
 
-Personal life tracking app backed by SQLite, with a FastAPI backend and plain HTML/CSS/JS frontend.
+Multi-user life tracking app backed by SQLite, with a FastAPI backend and plain HTML/CSS/JS frontend. Each user registers their own account and their data is fully isolated.
+
+> Contributions welcome — see [Contributing](#contributing) below.
 
 ---
 
@@ -12,23 +14,18 @@ Personal life tracking app backed by SQLite, with a FastAPI backend and plain HT
 pip install fastapi pydantic uvicorn
 ```
 
-### 2. Set environment variables
-
-```bash
-export TIMELOGGER_USER=yourname
-export TIMELOGGER_PASS=yourpassword
-```
-
-The server will refuse to start if these are not set.
-
-### 3. Run
+### 2. Run
 
 ```bash
 python3 -m uvicorn api:app --reload --host 0.0.0.0
 ```
 
 Frontend: `http://localhost:8000`
-API docs: `http://localhost:8000/docs`
+Interactive API docs: `http://localhost:8000/docs`
+
+### 3. Create an account
+
+Open the frontend and click **Create an account** on the login screen. Enter your display name, username, and a password (min 6 characters). Your display name is shown throughout the app (e.g. "Jacob's Log").
 
 ---
 
@@ -49,7 +46,7 @@ pip3 install fastapi pydantic uvicorn
 ### 3. Clone the project
 
 ```bash
-git clone your-repo-url /opt/lifelogger
+git clone https://github.com/jek821/LifeLogger /opt/lifelogger
 ```
 
 ### 4. Create a systemd service
@@ -58,18 +55,16 @@ git clone your-repo-url /opt/lifelogger
 sudo nano /etc/systemd/system/lifelogger.service
 ```
 
-Paste, replacing `yourname` and `yourpassword` with your actual credentials **before saving**:
+Paste:
 
 ```ini
 [Unit]
-Description=Jacob's Life Logger
+Description=Life Logger
 After=network.target
 
 [Service]
 WorkingDirectory=/opt/lifelogger
 ExecStart=python3 -m uvicorn api:app --host 127.0.0.1 --port 8000
-Environment=TIMELOGGER_USER=yourname
-Environment=TIMELOGGER_PASS=yourpassword
 Restart=always
 RestartSec=5
 
@@ -77,19 +72,12 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-> **Important:** The systemd service runs in an isolated environment. Shell exports and `.bashrc` variables are NOT inherited by it. Credentials must be set directly in the `Environment=` lines above — not in your shell.
-
 Enable and start it:
 
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable --now lifelogger
 sudo systemctl status lifelogger   # verify it's running
-```
-
-To verify the service picked up the right credentials:
-```bash
-sudo systemctl show lifelogger | grep Environment
 ```
 
 ### 5. Configure nginx
@@ -145,23 +133,10 @@ Port 8000 should **not** be exposed publicly since uvicorn binds to `127.0.0.1` 
 
 ## Authentication
 
-- Login with the username/password set in your environment variables.
-- Only one session is active at a time (stored in `session.json`).
-- Sessions expire after **1 hour of inactivity**. Any request resets the timer.
-- On expiry, the frontend automatically redirects to the login screen.
-- The session token is stored in `localStorage` and sent as a `Bearer` token on every request.
-
----
-
-## Configuration
-
-Edit `SEED_LABELS` in `main.py` to set the initial labels inserted into the database on first run:
-
-```python
-SEED_LABELS = {"Programming", "Meeting", "Lunch", "Exercise"}
-```
-
-Labels can also be added and deleted at runtime via the UI or the `/labels` endpoints. Deleting a label does **not** affect existing events that used it.
+- **Registration:** Create an account from the login screen. Provide a display name, username, and password.
+- **Sessions:** Token-based (Bearer). Sessions expire after **1 hour of inactivity** — any API request resets the timer.
+- **Isolation:** All data (events, labels) is scoped per user. Users cannot access each other's data.
+- Tokens are stored in `localStorage` and sent as `Authorization: Bearer <token>` on every request.
 
 ---
 
@@ -170,13 +145,16 @@ Labels can also be added and deleted at runtime via the UI or the `/labels` endp
 SQLite database stored at `timelogger.db` in the project directory. Schema:
 
 ```sql
-events (id INTEGER PRIMARY KEY, label TEXT, started_at TEXT, ended_at TEXT)
-labels (label TEXT PRIMARY KEY)
+users    (id, username, display_name, password_hash, created_at)
+sessions (token, user_id, last_used)
+events   (id, user_id, label, started_at, ended_at)
+labels   (user_id, label)
 ```
 
+- Passwords are hashed with PBKDF2-HMAC-SHA256 (100k iterations, random 32-byte salt)
 - All timestamps are stored in UTC as ISO 8601 strings
 - `ended_at` is `NULL` while an event is active
-- Only one event can be active at a time — starting a new event automatically ends the current one
+- Only one event can be active per user at a time — starting a new event automatically ends the current one
 - Active events survive server restarts (state is in the DB, not memory)
 
 ---
@@ -187,32 +165,53 @@ labels (label TEXT PRIMARY KEY)
 - **Labels** — manage your label set. Deleting a label does not affect past events.
 - **History** — view, edit, and delete past events for a given date range.
 - **Statistics** — query a date range to see time per label as percentages and total minutes, sorted by usage.
+- **Developer** — API reference and token access for scripting against your own data.
 
 ---
 
-## API Endpoints
+## API
 
-All endpoints except `GET /` and `POST /login` require a valid `Authorization: Bearer <token>` header.
+All endpoints except `GET /`, `POST /login`, and `POST /register` require a valid `Authorization: Bearer <token>` header.
 
-Timestamps are UTC ISO 8601 strings (e.g. `2026-03-23T14:30:00+00:00`). The frontend is responsible for converting to/from the user's local timezone.
+Timestamps are UTC ISO 8601 strings (e.g. `2026-03-23T14:30:00+00:00`). The frontend converts to/from the user's local timezone.
+
+An interactive API explorer is available at `/docs` (FastAPI's built-in Swagger UI).
 
 ### Auth
+
+#### `POST /register`
+```json
+{ "username": "yourname", "display_name": "Jacob", "password": "yourpassword" }
+```
+Returns `{ "token": "...", "display_name": "Jacob" }` on success. Fails with `409` if username is taken.
 
 #### `POST /login`
 ```json
 { "username": "yourname", "password": "yourpassword" }
 ```
-Returns `{ "token": "..." }` on success.
+Returns `{ "token": "...", "display_name": "Jacob" }` on success.
 
 #### `POST /logout`
-Invalidates the current session.
+Invalidates the current session token.
+
+#### `GET /me`
+Returns the authenticated user's profile.
+```json
+{ "id": 1, "username": "yourname", "display_name": "Jacob", "created_at": "..." }
+```
+
+#### `PATCH /me`
+Update your display name.
+```json
+{ "display_name": "New Name" }
+```
 
 ---
 
 ### Labels
 
 #### `GET /labels`
-Returns all labels sorted alphabetically.
+Returns your labels sorted alphabetically.
 ```json
 { "labels": ["Exercise", "Meeting", "Programming"] }
 ```
@@ -246,7 +245,7 @@ Ends the active event (if any) and starts a new one.
 Ends the active event without starting a new one.
 
 #### `GET /events?start=<utc>&end=<utc>`
-Returns all events whose `started_at` falls within the given UTC range, ordered by start time.
+Returns all your events whose `started_at` falls within the given UTC range, ordered by start time.
 
 #### `PATCH /event/{id}`
 Edit an event's label or timestamps.
@@ -270,3 +269,11 @@ Returns time breakdown across the given UTC range. Durations are in minutes (flo
   "minutes":     { "Programming": 187.5, "Meeting": 112.5 }
 }
 ```
+
+---
+
+## Contributing
+
+Contributions are welcome! Open an issue or pull request on GitHub:
+
+**[github.com/jek821/LifeLogger](https://github.com/jek821/LifeLogger)**
