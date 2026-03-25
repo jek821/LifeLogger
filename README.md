@@ -2,7 +2,7 @@
 
 **Life Logger** is a small, open-source web app you can run on your own machine or server. It helps you notice where your time actually goes: you log what you’re doing with simple labels, then use history and stats to see patterns instead of guessing. It isn’t therapy or a life coach in a box, it’s a privacy-friendly tool for people who like optimizing their time. 
 
-Under the hood it’s multi-user SQLite, a FastAPI API, and a static frontend (no framework build step). Each account keeps its own labels and events.
+Under the hood it’s multi-user SQLite, a FastAPI API. Each account keeps its own labels and events.
 
 > Contributions welcome — see [Contributing](#contributing) below.
 
